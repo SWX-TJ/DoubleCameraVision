@@ -11,11 +11,13 @@ public:
     //local image process function
 public:
     //set image whitebalance
-Mat WhiteBalanceFunc(Mat &InputImage,Mat &outImage,vector<Vec3f>Gen_param);
-//set image contast and brightness
-Mat ContrastBrightnessFunc(Mat &InputImage,Mat &outImage,vector<Vec2f>param);
-//image binary
-Mat BinaryFunc(Mat &InputImage,Mat &outImage,int binary_variety);
+    Mat WhiteBalanceFunc(Mat &InputImage,Mat &outImage,vector<Vec3f>Gen_param);
+    //set image contast and brightness
+    Mat ContrastBrightnessFunc(Mat &InputImage,Mat &outImage,vector<Vec2f>param);
+    //image binary
+    Mat BinaryFunc(Mat &InputImage,Mat &outImage,int binary_variety);
+    //CalibrateCamera
+    void m_CalibrateCamera(Mat InputImage);
 };
 
 #endif // LOCAL_ALGORITHM_H

@@ -15,6 +15,7 @@ private:
     QSize   CamFrameSize;
     bool    isOpen;
 
+
 //Function
 public:
     void    setCamName(int camindex);

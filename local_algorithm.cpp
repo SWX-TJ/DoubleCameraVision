@@ -19,3 +19,8 @@ Mat Local_Algorithm::BinaryFunc(Mat &InputImage, Mat &outImage, int binary_varie
 {
 
 }
+
+void Local_Algorithm::m_CalibrateCamera(Mat InputImage)
+{
+
+}
