@@ -63,8 +63,8 @@ Mat Local_Algorithm::m_LeftCaliPrePoc(VideoCapture &left_cap)
             cout<<"there is no corner point"<<endl;
             badresult++;
         }
-          imshow("leftprocImage",returnFrame);
-          waitKey(1000);
+        imshow("leftprocImage",returnFrame);
+        waitKey(1000);
 
     }
     return returnFrame;
@@ -87,7 +87,7 @@ Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
             if(imagecount==6)
             {
                 savepreprocFile.close();
-                  destroyWindow("rightprocImage");
+                destroyWindow("rightprocImage");
                 break;
             }
             ImagefileName +=to_string(imagecount);
@@ -98,7 +98,7 @@ Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
             imwrite("Rightfindcornpoint.bmp",returnFrame);
             savepreprocFile<<ImagefileName<<endl;
             imagecount++;
-             cout<<"next frame"<<endl;
+            cout<<"next frame"<<endl;
         }
         else
         {
@@ -182,7 +182,8 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
     {
         ifstream openLeftCaliImgList;
         openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
-      //  openRightCaliImgList.open(RightCaliCamFileLisrInfo);
+        leftinnerMat.open("leftcaminnerMat.xml",FileStorage::WRITE);
+        //  openRightCaliImgList.open(RightCaliCamFileLisrInfo);
         ofstream fout("left_caliberation_result.txt");  /* 保存标定结果的文件 */
         string leftfilename;
         while (getline(openLeftCaliImgList,leftfilename))
@@ -267,8 +268,10 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
         fout<<"总体平均误差："<<total_err/leftimage_count<<"pix"<<endl<<endl;
         Mat rotation_matrix = Mat(3,3,CV_32FC1, Scalar::all(0)); /* 保存每幅图像的旋转矩阵 */
         fout<<"相机内参数矩阵："<<endl;
+        leftinnerMat<<"LeftInnerCamMatrix"<<leftcameraMatrix;
         fout<<leftcameraMatrix<<endl<<endl;
         fout<<"畸变系数：\n";
+        leftinnerMat<<"LeftdistCoeffs"<<leftdistCoeffs;
         fout<<leftdistCoeffs<<endl<<endl<<endl;
         for (int i=0; i<leftimage_count; i++)
         {
@@ -282,13 +285,16 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             fout<<leftrvecsMat[i]<<endl<<endl;
         }
         fout<<endl;
+        leftinnerMat.release();
         destroyWindow("leftCamera Calibration");
     }
-   if(OnlyRightCam)
+    if(OnlyRightCam)
     {
         ifstream openRightCaliImgList;
+
         //openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
         openRightCaliImgList.open(RightCaliCamFileLisrInfo);
+        rightinnerMat.open("rightcaminnerMat.xml",FileStorage::WRITE);
         ofstream fout("right_caliberation_result.txt");  /* 保存标定结果的文件 */
         string rightfilename;
         while (getline(openRightCaliImgList,rightfilename))
@@ -373,8 +379,10 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
         fout<<"总体平均误差："<<total_err/rightimage_count<<"pix"<<endl<<endl;
         Mat rotation_matrix = Mat(3,3,CV_32FC1, Scalar::all(0)); /* 保存每幅图像的旋转矩阵 */
         fout<<"相机内参数矩阵："<<endl;
+        rightinnerMat<<"RightInnerCamMatrix"<<rightcameraMatrix;
         fout<<rightcameraMatrix<<endl<<endl;
         fout<<"畸变系数：\n";
+        rightinnerMat<<"RightdistCoeffs"<<rightdistCoeffs;
         fout<<rightdistCoeffs<<endl<<endl<<endl;
         for (int i=0; i<rightimage_count; i++)
         {
@@ -388,9 +396,10 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             fout<<rightrvecsMat[i]<<endl<<endl;
         }
         fout<<endl;
+        rightinnerMat.release();
         destroyWindow("rightCamera Calibration");
     }
-     if(OnlyAllCam)
+    if(OnlyAllCam)
     {
 
     }
@@ -403,4 +412,33 @@ void Local_Algorithm::set_chessBoardSize(int width, int height)
 {
     board_size.width = width;
     board_size.height = height;
+}
+
+vector<Mat> Local_Algorithm::returnLeftCam()
+{
+    FileStorage openLeftCamMatrix;
+    vector<Mat>leftcammatrixs;
+    openLeftCamMatrix.open("leftcaminnerMat.xml",FileStorage::READ);
+    //Mat cameraMatrix2, distCoeffs2;
+    openLeftCamMatrix["LeftInnerCamMatrix"] >> leftcameraMatrix;
+    //std::cout<<leftcameraMatrix<<endl;
+    openLeftCamMatrix["LeftdistCoeffs"] >> leftdistCoeffs;
+    leftcammatrixs.push_back(leftcameraMatrix);
+    leftcammatrixs.push_back(leftdistCoeffs);
+    openLeftCamMatrix.release();
+    return leftcammatrixs;
+}
+
+vector<Mat> Local_Algorithm::returnRightCam()
+{
+    FileStorage openRightCamMatrix;
+    vector<Mat>rightcammatrixs;
+    openRightCamMatrix.open("rightcaminnerMat.xml",FileStorage::READ);
+    //Mat cameraMatrix2, distCoeffs2;
+    openRightCamMatrix["RightInnerCamMatrix"] >> rightcameraMatrix;
+    openRightCamMatrix["RightdistCoeffs"] >> rightdistCoeffs;
+    rightcammatrixs.push_back(rightcameraMatrix);
+    rightcammatrixs.push_back(rightdistCoeffs);
+    openRightCamMatrix.release();
+    return rightcammatrixs;
 }

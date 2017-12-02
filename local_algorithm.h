@@ -25,6 +25,8 @@ public:
     vector<vector<Point2f>> leftimage_points_seq;//save all cornPoint
     vector<vector<Point2f>> rightimage_points_seq;//save all cornPoint
     /**calibrate Image used member**/
+    FileStorage leftinnerMat;//left camera innermat xml
+    FileStorage rightinnerMat;
     vector<Point2f> leftcaliimage_points_buf;//cach per Image cornPoint Num
     vector<Point2f> rightcaliimage_points_buf;//cach per Image cornPoint Num
     vector<vector<Point2f>> leftcaliimage_points_seq;//save all cornPoint
@@ -32,7 +34,7 @@ public:
     int leftcornPoint_count;//caculate cornPoint_count
     int rightcornPoint_count;//caculate cornPoint_count
     Mat leftcameraMatrix=Mat(3,3,CV_32FC1,Scalar::all(0)); /* 摄像机内参数矩阵 */
-     Mat rightcameraMatrix=Mat(3,3,CV_32FC1,Scalar::all(0)); /* 摄像机内参数矩阵 */
+    Mat rightcameraMatrix=Mat(3,3,CV_32FC1,Scalar::all(0)); /* 摄像机内参数矩阵 */
     vector<int> leftpoint_counts;  // 每幅图像中角点的数量
     vector<int> rightpoint_counts;  // 每幅图像中角点的数量
     Mat leftdistCoeffs=Mat(1,5,CV_32FC1,Scalar::all(0)); /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
@@ -56,6 +58,10 @@ public:
     void m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool OnlyAllCam);
     //set init board Size
     void set_chessBoardSize(int width,int height);
+    //use innerCammatrix
+    vector<Mat> returnLeftCam(void);
+    vector<Mat> returnRightCam(void);
+
 };
 
 #endif // LOCAL_ALGORITHM_H
