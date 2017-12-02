@@ -5,6 +5,7 @@
 #include <QCameraViewfinder>
 #include <QCameraInfo>
 #include <QList>
+#include <calibrationdlg.h>
 #define LEFT_CAMERA  1
 #define RIGHT_CAMERA 2
 #define ALL_CAMERA   3
@@ -21,21 +22,27 @@ public:
     ~CameraSetting_Dialog();
 signals:
     void returnSignal(int);
-    void send_CamSetInfo(int,bool,int,bool,bool);
+    void send_CamSetInfo(int,bool,int,bool,bool,int);
 public:
     QList<QCameraInfo> m_camerainfo;
     QString temp_deviceName;
+    CalibrationDlg *m_calibra;
     int device_num;//设备列表
     int CameraUseNumFlag;//使用单目还是双目标志
     int leftCameraIndex;//左摄像头设备索引
     int rightCameraIndex;//右摄像头设备索引
     bool leftCameraEnable;//使能点击状态
     bool rightCameraEnable;//使能点击状态
+public slots:
+    void accept_returnSlaveWindowsignal(int);
 private slots:
     void on_SettingBtn_clicked();
     void on_ReturnBtn_clicked();
     void on_leftEnable_btn_clicked();
     void on_rightEnable_btn_clicked();
+    void on_CalibrationSingleCamera_clicked();
+    void on_updateDevBtn_clicked();
+
 private:
     Ui::CameraSetting_Dialog *ui;
 };

@@ -11,7 +11,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     isLoadCameraPressed = false;
     isfirstloadCameraThread = true;
     connect(m_camSet,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
-    connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool)));
+    connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
     connect(m_imgThread,SIGNAL(send_leftImageDisp(QImage)),this,SLOT(accept_leftImageDisp(QImage)),Qt::BlockingQueuedConnection);
     connect(m_imgThread,SIGNAL(send_rightImageDisp(QImage)),this,SLOT(accept_rightImageDisp(QImage)),Qt::BlockingQueuedConnection);
     connect(m_imgThread,SIGNAL(send_allImageDisp(QImage,QImage)),this,SLOT(accept_allImageDisp(QImage,QImage)),Qt::BlockingQueuedConnection);

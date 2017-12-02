@@ -30,18 +30,21 @@ SOURCES += \
     camerasetting_dialog.cpp \
     cameradevice.cpp \
     imagethread.cpp \
-    local_algorithm.cpp
+    local_algorithm.cpp \
+    calibrationdlg.cpp
 
 HEADERS += \
         visionmainwindow.h \
     camerasetting_dialog.h \
     cameradevice.h \
     imagethread.h \
-    local_algorithm.h
+    local_algorithm.h \
+    calibrationdlg.h
 
 FORMS += \
         visionmainwindow.ui \
-    camerasetting_dialog.ui
+    camerasetting_dialog.ui \
+    calibrationdlg.ui
 
 INCLUDEPATH += F:/opencvmingw/include
 INCLUDEPATH += F:/opencvmingw/include/opencv
