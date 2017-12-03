@@ -6,28 +6,33 @@ Local_Algorithm::Local_Algorithm()
     rightimage_count = 0;//Right Input Image num
     LeftCaliCamFileLisrInfo = "LeftCaliImageInfo.txt";
     RightCaliCamFileLisrInfo = "RightCaliImageInfo.txt";
+    LeftinnerMatrixXML = "leftcaminnerMat.xml";
+    RightinnerMatrixXML = "rightcaminnerMat.xml";
+
 }
 
 Mat Local_Algorithm::WhiteBalanceFunc(Mat &InputImage, Mat &outImage, vector<Vec3f> Gen_param)
 {
 
+    return outImage;
 }
 
 Mat Local_Algorithm::ContrastBrightnessFunc(Mat &InputImage, Mat &outImage, vector<Vec2f> param)
 {
-
+return outImage;
 }
 
 Mat Local_Algorithm::BinaryFunc(Mat &InputImage, Mat &outImage, int binary_variety)
 {
-
+return outImage;
 }
+
+
 
 Mat Local_Algorithm::m_LeftCaliPrePoc(VideoCapture &left_cap)
 {
     Mat returnFrame;
-    ofstream savepreprocFile;
-    savepreprocFile.open(LeftCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
+    saveLeftpreprocFile.open(LeftCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
     int imagecount = 0;
     int badresult = 0;
     while(1)
@@ -39,17 +44,16 @@ Mat Local_Algorithm::m_LeftCaliPrePoc(VideoCapture &left_cap)
         {
             if(imagecount==6)
             {
-                savepreprocFile.close();
+                saveLeftpreprocFile.close();
                 destroyWindow("leftprocImage");
                 break;
             }
             ImagefileName +=to_string(imagecount);
             ImagefileName +=Imagefiletype;
-            //cout<<ImagefileName<<endl;
             imwrite(ImagefileName,returnFrame);
             drawChessboardCorners(returnFrame,board_size,leftimage_points_buf,true);
             imwrite("Leftfindcornpoint.bmp",returnFrame);
-            savepreprocFile<<ImagefileName<<endl;
+            saveLeftpreprocFile<<ImagefileName<<endl;
             imagecount++;
             cout<<"next frame"<<endl;
         }
@@ -63,18 +67,66 @@ Mat Local_Algorithm::m_LeftCaliPrePoc(VideoCapture &left_cap)
             cout<<"there is no corner point"<<endl;
             badresult++;
         }
-        imshow("leftprocImage",returnFrame);
-        waitKey(1000);
-
+       // _sleep(1000);
     }
     return returnFrame;
+}
+
+bool Local_Algorithm::m_LeftCaliPrePoc_1(Mat &InputImage, int &image_count,int max_calibranum)
+{
+
+    if(image_count==max_calibranum)
+    {
+        return true;
+    }
+    if(image_count ==0)
+    {
+        saveLeftpreprocFile.open(LeftCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
+        String ImagefileName = "Leftchess";
+        String Imagefiletype = ".bmp";
+        if(findChessboardCorners(InputImage,board_size,leftimage_points_buf))
+        {
+            ImagefileName +=to_string(image_count);
+            ImagefileName +=Imagefiletype;
+            imwrite(ImagefileName,InputImage);
+            drawChessboardCorners(InputImage,board_size,leftimage_points_buf,true);
+            imwrite("Leftfindcornpoint.bmp",InputImage);
+            saveLeftpreprocFile<<ImagefileName<<endl;
+            image_count++;
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        String ImagefileName = "Leftchess";
+        String Imagefiletype = ".bmp";
+        if(findChessboardCorners(InputImage,board_size,leftimage_points_buf))
+        {
+            ImagefileName +=to_string(image_count);
+            ImagefileName +=Imagefiletype;
+            imwrite(ImagefileName,InputImage);
+            drawChessboardCorners(InputImage,board_size,leftimage_points_buf,true);
+            imwrite("Leftfindcornpoint.bmp",InputImage);
+            saveLeftpreprocFile<<ImagefileName<<endl;
+            image_count++;
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
 }
 
 Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
 {
     Mat returnFrame;
-    ofstream savepreprocFile;
-    savepreprocFile.open(RightCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
+    saveRightpreprocFile.open(RightCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
     int imagecount = 0;
     int badresult = 0;
     while(1)
@@ -86,7 +138,7 @@ Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
         {
             if(imagecount==6)
             {
-                savepreprocFile.close();
+                saveRightpreprocFile.close();
                 destroyWindow("rightprocImage");
                 break;
             }
@@ -96,7 +148,7 @@ Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
             imwrite(ImagefileName,returnFrame);
             drawChessboardCorners(returnFrame,board_size,rightimage_points_buf,true);
             imwrite("Rightfindcornpoint.bmp",returnFrame);
-            savepreprocFile<<ImagefileName<<endl;
+            saveRightpreprocFile<<ImagefileName<<endl;
             imagecount++;
             cout<<"next frame"<<endl;
         }
@@ -109,16 +161,68 @@ Mat Local_Algorithm::m_RightCaliPrePoc(VideoCapture &right_cap)
             cout<<"there is no corner point"<<endl;
             badresult++;
         }
-        imshow("rightprocImage",returnFrame);
-        waitKey(1000);
+      //  _sleep(1000);
     }
     return returnFrame;
 }
 
+bool Local_Algorithm::m_RightCaliPrePoc_1(Mat &InputImage, int &image_count, int max_calibranum)
+{
+    if(image_count==max_calibranum)
+    {
+        return true;
+    }
+    if(image_count ==0)
+    {
+        saveRightpreprocFile.open(RightCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
+        String ImagefileName = "Rightchess";
+        String Imagefiletype = ".bmp";
+        if(findChessboardCorners(InputImage,board_size,rightimage_points_buf))
+        {
+            ImagefileName +=to_string(image_count);
+            ImagefileName +=Imagefiletype;
+            imwrite(ImagefileName,InputImage);
+            drawChessboardCorners(InputImage,board_size,leftimage_points_buf,true);
+            imwrite("Rightfindcornpoint.bmp",InputImage);
+            saveRightpreprocFile<<ImagefileName<<endl;
+            image_count++;
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        String ImagefileName = "Rightchess";
+        String Imagefiletype = ".bmp";
+        if(findChessboardCorners(InputImage,board_size,rightimage_points_buf))
+        {
+            ImagefileName +=to_string(image_count);
+            ImagefileName +=Imagefiletype;
+            imwrite(ImagefileName,InputImage);
+            drawChessboardCorners(InputImage,board_size,rightimage_points_buf,true);
+            imwrite("Rightfindcornpoint.bmp",InputImage);
+            saveRightpreprocFile<<ImagefileName<<endl;
+            image_count++;
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return false;
+}
+
+
+
+
 Mat Local_Algorithm::m_AllCaliPrePoc(VideoCapture &left_cap, VideoCapture &right_cap)
 {
     Mat left_returnFrame,right_returnFrame;
-    ofstream saveLeftpreprocFile,saveRightpreprocFile;
+
     saveLeftpreprocFile.open(LeftCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
     saveRightpreprocFile.open(RightCaliCamFileLisrInfo,ios_base::out|ios_base::trunc);
     int left_imagecount = 0;
@@ -157,9 +261,7 @@ Mat Local_Algorithm::m_AllCaliPrePoc(VideoCapture &left_cap, VideoCapture &right
             saveRightpreprocFile<<rightImagefileName<<endl;
             left_imagecount++;
             right_imagecount++;
-            imshow("leftprocImage",left_returnFrame);
-            imshow("rightprocImage",right_returnFrame);
-            waitKey(2000);
+         //   _sleep(1000);
         }
         else
         {
@@ -175,15 +277,14 @@ Mat Local_Algorithm::m_AllCaliPrePoc(VideoCapture &left_cap, VideoCapture &right
     return left_returnFrame;
 }
 
-void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool OnlyAllCam)
+bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
 {
 
     if(OnlyLeftCam)
     {
         ifstream openLeftCaliImgList;
         openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
-        leftinnerMat.open("leftcaminnerMat.xml",FileStorage::WRITE);
-        //  openRightCaliImgList.open(RightCaliCamFileLisrInfo);
+        leftinnerMat.open(LeftinnerMatrixXML,FileStorage::WRITE);
         ofstream fout("left_caliberation_result.txt");  /* 保存标定结果的文件 */
         string leftfilename;
         while (getline(openLeftCaliImgList,leftfilename))
@@ -198,7 +299,7 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             }
             if (0 == findChessboardCorners(imageInput,board_size,leftcaliimage_points_buf))
             {
-                cout<<"can not find chessboard corners!\n"; //找不到角点
+               // cout<<"can not find chessboard corners!\n"; //找不到角点
             }
             else
             {
@@ -208,10 +309,11 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
                 find4QuadCornerSubpix(grayImage,leftcaliimage_points_buf,Size(5,5)); //对粗提取的角点进行精确化
                 //cornerSubPix(grayImage,image_points_buf,Size(5,5),Size(-1,-1),TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER,30,0.1));
                 leftcaliimage_points_seq.push_back(leftcaliimage_points_buf);  //保存亚像素角点
-                /* 在图像上显示角点位置 */
-                drawChessboardCorners(grayImage,board_size,leftcaliimage_points_buf,true); //用于在图片中标记角点
-                imshow("leftCamera Calibration",grayImage);//显示图片
-                waitKey(500);//暂停0.5S
+              //  /* 在图像上显示角点位置 */
+               // drawChessboardCorners(grayImage,board_size,leftcaliimage_points_buf,true); //用于在图片中标记角点
+                //while(!getchar()=='c');
+                //imshow("leftCamera Calibration",grayImage);//显示图片
+               // waitKey(500);//暂停0.5S
             }
         }
         vector<vector<Point3f>> object_points; /* 保存标定板上角点的三维坐标 */
@@ -246,7 +348,6 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
         double total_err = 0.0; /* 所有图像的平均误差的总和 */
         double err = 0.0; /* 每幅图像的平均误差 */
         vector<Point2f> image_points2; /* 保存重新计算得到的投影点 */
-        // cout<<"No problem"<<endl;
         for (int i=0;i<leftimage_count;i++)
         {
             vector<Point3f> tempPointSet=object_points[i];
@@ -256,7 +357,7 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             vector<Point2f> tempImagePoint = leftcaliimage_points_seq[i];
             Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
             Mat image_points2Mat = Mat(1,image_points2.size(), CV_32FC2);
-            for (int j = 0 ; j < tempImagePoint.size(); j++)
+            for (size_t j = 0 ; j < tempImagePoint.size(); j++)
             {
                 image_points2Mat.at<Vec2f>(0,j) = Vec2f(image_points2[j].x, image_points2[j].y);
                 tempImagePointMat.at<Vec2f>(0,j) = Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
@@ -286,15 +387,13 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
         }
         fout<<endl;
         leftinnerMat.release();
-        destroyWindow("leftCamera Calibration");
+       // destroyWindow("leftCamera Calibration");
     }
     if(OnlyRightCam)
     {
         ifstream openRightCaliImgList;
-
-        //openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
         openRightCaliImgList.open(RightCaliCamFileLisrInfo);
-        rightinnerMat.open("rightcaminnerMat.xml",FileStorage::WRITE);
+        rightinnerMat.open( RightinnerMatrixXML,FileStorage::WRITE);
         ofstream fout("right_caliberation_result.txt");  /* 保存标定结果的文件 */
         string rightfilename;
         while (getline(openRightCaliImgList,rightfilename))
@@ -309,7 +408,7 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             }
             if (0 == findChessboardCorners(imageInput,board_size,rightcaliimage_points_buf))
             {
-                cout<<"can not find chessboard corners!\n"; //找不到角点
+                //cout<<"can not find chessboard corners!\n"; //找不到角点
             }
             else
             {
@@ -319,10 +418,10 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
                 find4QuadCornerSubpix(grayImage,rightcaliimage_points_buf,Size(5,5)); //对粗提取的角点进行精确化
                 //cornerSubPix(grayImage,image_points_buf,Size(5,5),Size(-1,-1),TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER,30,0.1));
                 rightcaliimage_points_seq.push_back(rightcaliimage_points_buf);  //保存亚像素角点
-                /* 在图像上显示角点位置 */
-                drawChessboardCorners(grayImage,board_size,rightcaliimage_points_buf,true); //用于在图片中标记角点
-                imshow("rightCamera Calibration",grayImage);//显示图片
-                waitKey(500);//暂停0.5S
+              //  /* 在图像上显示角点位置 */
+             //   drawChessboardCorners(grayImage,board_size,rightcaliimage_points_buf,true); //用于在图片中标记角点
+                //imshow("rightCamera Calibration",grayImage);//显示图片
+               // waitKey(500);//暂停0.5S
             }
         }
         vector<vector<Point3f>> object_points; /* 保存标定板上角点的三维坐标 */
@@ -367,7 +466,7 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
             vector<Point2f> tempImagePoint = rightcaliimage_points_seq[i];
             Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
             Mat image_points2Mat = Mat(1,image_points2.size(), CV_32FC2);
-            for (int j = 0 ; j < tempImagePoint.size(); j++)
+            for (size_t j = 0 ; j < tempImagePoint.size(); j++)
             {
                 image_points2Mat.at<Vec2f>(0,j) = Vec2f(image_points2[j].x, image_points2[j].y);
                 tempImagePointMat.at<Vec2f>(0,j) = Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
@@ -397,13 +496,10 @@ void Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool 
         }
         fout<<endl;
         rightinnerMat.release();
-        destroyWindow("rightCamera Calibration");
-    }
-    if(OnlyAllCam)
-    {
+       // destroyWindow("rightCamera Calibration");
 
     }
-
+     return true;
 }
 
 
@@ -416,29 +512,28 @@ void Local_Algorithm::set_chessBoardSize(int width, int height)
 
 vector<Mat> Local_Algorithm::returnLeftCam()
 {
-    FileStorage openLeftCamMatrix;
+    // FileStorage openLeftCamMatrix;
     vector<Mat>leftcammatrixs;
-    openLeftCamMatrix.open("leftcaminnerMat.xml",FileStorage::READ);
-    //Mat cameraMatrix2, distCoeffs2;
-    openLeftCamMatrix["LeftInnerCamMatrix"] >> leftcameraMatrix;
+    leftinnerMat.open(LeftinnerMatrixXML,FileStorage::READ);
+    leftinnerMat["LeftInnerCamMatrix"] >> leftcameraMatrix;
     //std::cout<<leftcameraMatrix<<endl;
-    openLeftCamMatrix["LeftdistCoeffs"] >> leftdistCoeffs;
+    leftinnerMat["LeftdistCoeffs"] >> leftdistCoeffs;
     leftcammatrixs.push_back(leftcameraMatrix);
     leftcammatrixs.push_back(leftdistCoeffs);
-    openLeftCamMatrix.release();
+    leftinnerMat.release();
     return leftcammatrixs;
 }
 
 vector<Mat> Local_Algorithm::returnRightCam()
 {
-    FileStorage openRightCamMatrix;
+    //FileStorage openRightCamMatrix;
     vector<Mat>rightcammatrixs;
-    openRightCamMatrix.open("rightcaminnerMat.xml",FileStorage::READ);
+    rightinnerMat.open( RightinnerMatrixXML,FileStorage::READ);
     //Mat cameraMatrix2, distCoeffs2;
-    openRightCamMatrix["RightInnerCamMatrix"] >> rightcameraMatrix;
-    openRightCamMatrix["RightdistCoeffs"] >> rightdistCoeffs;
+    rightinnerMat["RightInnerCamMatrix"] >> rightcameraMatrix;
+    rightinnerMat["RightdistCoeffs"] >> rightdistCoeffs;
     rightcammatrixs.push_back(rightcameraMatrix);
     rightcammatrixs.push_back(rightdistCoeffs);
-    openRightCamMatrix.release();
+    rightinnerMat.release();
     return rightcammatrixs;
 }

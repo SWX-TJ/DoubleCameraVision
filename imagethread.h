@@ -40,6 +40,8 @@ public:
 /*        ProcMode*/
     int ControlCamSet;
     bool isCaliCam;
+    int leftcalibretecamnum = 0;
+    int rightcalibretecamnum = 0;
 
  //public class
 public:

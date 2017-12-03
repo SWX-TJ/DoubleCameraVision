@@ -5,8 +5,6 @@ ImageThread::ImageThread()
     m_leftCamDev  = new CameraDevice;
     m_rightCamDev = new CameraDevice;
     m_local_algro = new Local_Algorithm;
-    m_local_algro->returnLeftCam();
-    m_local_algro->returnRightCam();
     CamSelect     = DEFAULT_CAMERA;
     isOpenLeftCam   =  false;
     isOpenRightCam  =  false;
@@ -95,6 +93,8 @@ void ImageThread::run()
     {
     case Mode_ProcCAM:
     {
+        m_local_algro->returnLeftCam();
+        m_local_algro->returnRightCam();
         switch (CamSelect) {
         case LEFT_CAMERA:
             m_leftCam = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
@@ -113,7 +113,6 @@ void ImageThread::run()
                     m_leftCam->operator >>(oriLeftFrame);
                     cv::Mat leftcorrectImage;
                     undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-
                     cv::Mat templeftframe;
                     cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
                     dispLeftFrame = convertMatToQImage(templeftframe);
@@ -203,9 +202,19 @@ void ImageThread::run()
                 {
                     if(isCaliCam)
                     {
-                        isCaliCam = false;
-                        m_local_algro->m_LeftCaliPrePoc(*m_leftCam);
-                        m_local_algro->m_CalibrateCamera(true,false,false);
+                        m_leftCam->operator >>(oriLeftFrame);
+                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,6))
+                        {
+                            cv::Mat templeftframe;
+                            cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
+                            dispLeftFrame = convertMatToQImage(templeftframe);
+                            send_leftCaliImageDisp(dispLeftFrame);
+                        }
+                        else
+                        {
+                            isCaliCam = false;
+                            m_local_algro->m_CalibrateCamera(true,false);
+                        }
                     }
                     else
                     {
@@ -246,9 +255,19 @@ void ImageThread::run()
                 {
                     if(isCaliCam)
                     {
-                        isCaliCam = false;
-                        m_local_algro->m_RightCaliPrePoc(*m_rightCam);
-                        m_local_algro->m_CalibrateCamera(false,true,false);
+                        m_rightCam->operator >>(oriRightFrame);
+                        if(!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,6))
+                        {
+                            cv::Mat temprightframe;
+                            cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
+                            dispRightFrame = convertMatToQImage(temprightframe);
+                            send_rightCaliImageDisp(dispRightFrame);
+                        }
+                        else
+                        {
+                            isCaliCam = false;
+                            m_local_algro->m_CalibrateCamera(false,true);
+                        }
                     }
                     else
                     {
@@ -260,12 +279,15 @@ void ImageThread::run()
                             dispRightFrame = convertMatToQImage(temprightframe);
                             send_rightCaliImageDisp(dispRightFrame);
                         }
-                        cv::Mat correctImage;
-                        undistort(oriRightFrame,correctImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-                        cv::Mat temprightframe;
-                        cv::resize(correctImage,temprightframe,cv::Size(320,240));
-                        dispRightFrame = convertMatToQImage(temprightframe);
-                        send_rightCaliImageDisp(dispRightFrame);
+                        else
+                        {
+                            cv::Mat correctImage;
+                            undistort(oriRightFrame,correctImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                            cv::Mat temprightframe;
+                            cv::resize(correctImage,temprightframe,cv::Size(320,240));
+                            dispRightFrame = convertMatToQImage(temprightframe);
+                            send_rightCaliImageDisp(dispRightFrame);
+                        }
                     }
                 }
             }
@@ -289,9 +311,23 @@ void ImageThread::run()
                 {
                     if(isCaliCam)
                     {
-                        isCaliCam = false;
-                        m_local_algro->m_AllCaliPrePoc(*m_leftCam,*m_rightCam);
-                        m_local_algro->m_CalibrateCamera(true,true,false);
+                        m_leftCam->operator >>(oriLeftFrame);
+                        m_rightCam->operator >>(oriRightFrame);
+                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,6)&&!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,6))
+                        {
+                            cv::Mat templeftframe;
+                            cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
+                            cv::Mat temprightframe;
+                            cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
+                            dispLeftFrame = convertMatToQImage(templeftframe);
+                            dispRightFrame = convertMatToQImage(temprightframe);
+                            send_allCaliImageDisp(dispLeftFrame,dispRightFrame);
+                        }
+                        else
+                        {
+                            isCaliCam = false;
+                            m_local_algro->m_CalibrateCamera(true,true);
+                        }
                     }
                     {
                         m_leftCam->operator >>(oriLeftFrame);
@@ -306,17 +342,20 @@ void ImageThread::run()
                             dispRightFrame = convertMatToQImage(temprightframe);
                             send_allCaliImageDisp(dispLeftFrame,dispRightFrame);
                         }
-                        cv::Mat leftcorrectImage;
-                        undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-                        cv::Mat templeftframe;
-                        cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
-                        cv::Mat rightcorrectImage;
-                        undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-                        cv::Mat temprightframe;
-                        cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                        dispLeftFrame = convertMatToQImage(templeftframe);
-                        dispRightFrame = convertMatToQImage(temprightframe);
-                        send_allCaliImageDisp(dispLeftFrame,dispRightFrame);
+                        else
+                        {
+                            cv::Mat leftcorrectImage;
+                            undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
+                            cv::Mat templeftframe;
+                            cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
+                            cv::Mat rightcorrectImage;
+                            undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                            cv::Mat temprightframe;
+                            cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
+                            dispLeftFrame = convertMatToQImage(templeftframe);
+                            dispRightFrame = convertMatToQImage(temprightframe);
+                            send_allCaliImageDisp(dispLeftFrame,dispRightFrame);
+                        }
                     }
                 }
             }

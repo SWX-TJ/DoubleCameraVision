@@ -12,8 +12,12 @@ public:
     /***Local image process Member***/
 public:
     /****Calibrate image member****/
-    string LeftCaliCamFileLisrInfo;
+    ofstream saveLeftpreprocFile,saveRightpreprocFile;//left pre proc file txt
+   // ofstream savepreprocFile;
+    string LeftCaliCamFileLisrInfo;//result file txt
     string RightCaliCamFileLisrInfo;
+    string LeftinnerMatrixXML;//result file xml
+    string RightinnerMatrixXML;
     Size board_size;//chess board rows_cornPointNum,cols_cornPointNum
     Size leftImage_size;//left Input Image rows,cols
     Size rightImage_size;//right Input Image rows,cols
@@ -43,6 +47,10 @@ public:
     vector<Mat> leftrvecsMat; /* 每幅图像的平移向量 */
     vector<Mat> righttvecsMat;  /* 每幅图像的旋转向量 */
     vector<Mat> rightrvecsMat; /* 每幅图像的平移向量 */
+    /***calbration end******/
+    /***base image process member***/
+
+    /*******/
     /*****local image process function*****/
 public:
     //set image whitebalance
@@ -52,13 +60,20 @@ public:
     //image binary
     Mat BinaryFunc(Mat &InputImage,Mat &outImage,int binary_variety);
     //CalibrateCamera
+    //left calibration image func v1.0
     Mat m_LeftCaliPrePoc(VideoCapture &left_cap);
+    //left calibration image func v1.1
+     bool m_LeftCaliPrePoc_1(Mat &InputImage,int &image_count,int max_calibranum);
+//Right calibration image func v1.0
     Mat m_RightCaliPrePoc(VideoCapture &right_cap);
+//Right calibration image func v1.1
+     bool m_RightCaliPrePoc_1(Mat &InputImage,int &image_count,int max_calibranum);
+
     Mat m_AllCaliPrePoc(VideoCapture &left_cap,VideoCapture &right_cap);
-    void m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool OnlyAllCam);
+    bool m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam);
     //set init board Size
     void set_chessBoardSize(int width,int height);
-    //use innerCammatrix
+    //return use innerCammatrix
     vector<Mat> returnLeftCam(void);
     vector<Mat> returnRightCam(void);
 
