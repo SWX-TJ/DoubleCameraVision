@@ -45,6 +45,7 @@ public slots:
     void accept_leftCaliImageDisp(QImage);
     void accept_rightCaliImageDisp(QImage);
     void accept_allCaliImageDisp(QImage,QImage);
+    void accept_isdownCalibration(bool);
 private:
     Ui::CalibrationDlg *ui;
 };

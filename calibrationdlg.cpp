@@ -17,9 +17,11 @@ CalibrationDlg::CalibrationDlg(QWidget *parent) :
     connect(m_calithread,SIGNAL(send_leftCaliImageDisp(QImage)),this,SLOT(accept_leftCaliImageDisp(QImage)),Qt::BlockingQueuedConnection);
     connect(m_calithread,SIGNAL(send_rightCaliImageDisp(QImage)),this,SLOT(accept_rightCaliImageDisp(QImage)),Qt::BlockingQueuedConnection);
     connect(m_calithread,SIGNAL(send_allCaliImageDisp(QImage,QImage)),this,SLOT(accept_allCaliImageDisp(QImage,QImage)),Qt::BlockingQueuedConnection);
+    connect(m_calithread,SIGNAL(send_isdownCalibration(bool)),this,SLOT(accept_isdownCalibration(bool)));
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_calithread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_calithread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CalibraCamInfo(bool,int,int,int,int)),m_calithread,SLOT(accept_CaliCaminfo(bool,int,int,int,int)));
+
 }
 
 CalibrationDlg::~CalibrationDlg()
@@ -70,6 +72,14 @@ void CalibrationDlg::accept_allCaliImageDisp(QImage leftImg, QImage rightImg)
 {
     ui->leftImage_disp->setPixmap(QPixmap::fromImage(leftImg));
     ui->rightImage_disp->setPixmap(QPixmap::fromImage(rightImg));
+}
+
+void CalibrationDlg::accept_isdownCalibration(bool isdownCalibration)
+{
+    if(isdownCalibration)
+    {
+
+    }
 }
 
 void CalibrationDlg::on_CalibraBtn_clicked()

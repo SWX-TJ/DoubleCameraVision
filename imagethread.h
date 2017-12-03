@@ -53,6 +53,7 @@ signals:
     void send_leftCaliImageDisp(QImage);//disp cali left frame
     void send_rightCaliImageDisp(QImage);//disp cali right frame
     void send_allCaliImageDisp(QImage,QImage);//disp cali all frame
+    void send_isdownCalibration(bool);//show is finish calibration or not
 public slots:
     //accept camera set info
     void accept_CamSetInfo(int leftCamindex = 0,bool isleftSelect = false,int rightCamindex =0,bool isrightSelect = false,bool AllSelect = false,int camMode =1);

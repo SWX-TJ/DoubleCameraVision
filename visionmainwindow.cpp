@@ -61,9 +61,9 @@ void VisionMainWindow::on_actionCamDevSet_triggered()
 
 void VisionMainWindow::on_ExitBtn_clicked()
 {
-   send_CloseCamInfo(true,true,true);
-   m_imgThread->quit();
-   m_imgThread->wait();
+    send_CloseCamInfo(true,true,true);
+    m_imgThread->quit();
+    m_imgThread->wait();
     exit(EXIT_SUCCESS);
 }
 
@@ -83,7 +83,7 @@ void VisionMainWindow::on_openVisonbtn_clicked()
     }
     else
     {
-       send_ControlCamInfo(true,true,true);
+        send_ControlCamInfo(true,true,true);
         ui->openVisonbtn->setText(QString("视觉关闭"));
     }
 }

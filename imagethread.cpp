@@ -213,7 +213,10 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            m_local_algro->m_CalibrateCamera(true,false);
+                            if(m_local_algro->m_CalibrateCamera(true,false))
+                            {
+                                send_isdownCalibration(true);
+                            }
                         }
                     }
                     else
@@ -266,7 +269,10 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            m_local_algro->m_CalibrateCamera(false,true);
+                          if(m_local_algro->m_CalibrateCamera(false,true))
+                          {
+                              send_isdownCalibration(true);
+                          }
                         }
                     }
                     else
@@ -326,7 +332,10 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            m_local_algro->m_CalibrateCamera(true,true);
+                            if(m_local_algro->m_CalibrateCamera(true,true))
+                            {
+                                send_isdownCalibration(true);
+                            }
                         }
                     }
                     {
