@@ -3,6 +3,8 @@
 #include <QDialog>
 #include <imagethread.h>
 #include <QImage>
+#include <QFile>
+#include <QTextStream>
 namespace Ui {
 class CalibrationDlg;
 }

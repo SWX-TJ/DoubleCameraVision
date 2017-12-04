@@ -228,6 +228,7 @@ void ImageThread::run()
                             cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
                             dispLeftFrame = convertMatToQImage(templeftframe);
                             send_leftCaliImageDisp(dispLeftFrame);
+
                         }
                         else
                         {

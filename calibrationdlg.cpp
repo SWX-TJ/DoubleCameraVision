@@ -32,6 +32,7 @@ CalibrationDlg::~CalibrationDlg()
 void CalibrationDlg::on_openCamBtn_clicked()
 {
     isLoadCameraPressed = !isLoadCameraPressed;
+
     if(isLoadCameraPressed)
     {
         if(isfirstloadCameraThread)
@@ -78,7 +79,22 @@ void CalibrationDlg::accept_isdownCalibration(bool isdownCalibration)
 {
     if(isdownCalibration)
     {
-
+        ifstream templeftfile;
+        string   leftfileline;
+        QString   leftreadtxt;
+        templeftfile.open(m_calithread->m_local_algro->resultLeftCamCal);
+        while(getline(templeftfile,leftfileline))
+        {
+             ui->resultTxtEdit->append(leftreadtxt.fromStdString(leftfileline));
+        }
+        ifstream  temprightfile;
+        string    rightfileline;
+        QString   rightreadtxt;
+        temprightfile.open(m_calithread->m_local_algro->resultRightCamCal);
+        while(getline(temprightfile,rightfileline))
+        {
+             ui->resultTxtEdit->append(rightreadtxt.fromStdString(rightfileline));
+        }
     }
 }
 
