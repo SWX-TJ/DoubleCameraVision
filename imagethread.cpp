@@ -1,4 +1,4 @@
-#include "imagethread.h"
+﻿#include "imagethread.h"
 #include <QDebug>
 ImageThread::ImageThread()
 {
@@ -13,6 +13,7 @@ ImageThread::ImageThread()
     iscloseRightCam =  false;
     iscloseAllCam   =  false;
     isCaliCam       =  false;
+    isFaceDetection_Module =  false;
     ControlCamSet = Mode_ProcCAM;
 }
 
@@ -85,6 +86,11 @@ void ImageThread::accept_CaliCaminfo(bool isCaliCame,int board_width,int board_h
     m_local_algro->real_square_size.height = per_board_height;
 }
 
+void ImageThread::accept_FaceDtetionInfo(bool arg)
+{
+    isFaceDetection_Module = arg;
+}
+
 
 
 void ImageThread::run()
@@ -113,10 +119,21 @@ void ImageThread::run()
                     m_leftCam->operator >>(oriLeftFrame);
                     cv::Mat leftcorrectImage;
                     undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-                    cv::Mat templeftframe;
-                    cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
-                    dispLeftFrame = convertMatToQImage(templeftframe);
-                    send_leftImageDisp(dispLeftFrame);
+                    if(isFaceDetection_Module)
+                    {
+                        Mat leftfacedetectImage=m_local_algro->faceDetectionFunc(leftcorrectImage);
+                        cv::Mat templeftframe;
+                        cv::resize(leftfacedetectImage,templeftframe,cv::Size(320,240));
+                        dispLeftFrame = convertMatToQImage(templeftframe);
+                        send_leftImageDisp(dispLeftFrame);
+                    }
+                    else
+                    {
+                        cv::Mat templeftframe;
+                        cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
+                        dispLeftFrame = convertMatToQImage(templeftframe);
+                        send_leftImageDisp(dispLeftFrame);
+                    }
                 }
             }
             break;
@@ -137,16 +154,51 @@ void ImageThread::run()
                     m_rightCam->operator >>(oriRightFrame);
                     cv::Mat rightcorrectImage;
                     undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-                    cv::Mat temprightframe;
-                    cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                    dispRightFrame = convertMatToQImage(temprightframe);
-                    send_rightImageDisp(dispRightFrame);
+                    if(isFaceDetection_Module)
+                    {
+                        Mat rightfacedetectImage=m_local_algro->faceDetectionFunc(rightcorrectImage);
+                        cv::Mat temprightframe;
+                        cv::resize(rightfacedetectImage,temprightframe,cv::Size(320,240));
+                        dispRightFrame = convertMatToQImage(temprightframe);
+                        send_rightImageDisp(dispRightFrame);
+                    }
+                    else
+                    {
+                        cv::Mat temprightframe;
+                        cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
+                        dispRightFrame = convertMatToQImage(temprightframe);
+                        send_rightImageDisp(dispRightFrame);
+                    }
                 }
             }
             break;
         case ALL_CAMERA:
             m_leftCam  = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
             m_rightCam = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
+
+            while (oriLeftFrame.rows < 2) {
+                m_leftCam->open(0);
+                m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
+                m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                cont = 0;
+                while (oriLeftFrame.rows < 2 && cont<5) {
+                    m_leftCam->operator >>(oriLeftFrame);
+                    cont++;
+                }
+            }
+            while (oriRightFrame.rows < 2) {
+                m_rightCam->open(1);
+                m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
+                m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                cont = 0;
+                while (oriRightFrame.rows < 2 && cont<5) {
+                    m_rightCam->operator >>(oriRightFrame);
+                    cont++;
+                }
+            }
+
             while(1)
             {
                 if(isOpenAllCam)
@@ -165,16 +217,30 @@ void ImageThread::run()
                     m_rightCam->operator >>(oriRightFrame);
                     cv::Mat leftcorrectImage;
                     undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-                    cv::Mat templeftframe;
-                    cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
                     cv::Mat rightcorrectImage;
                     undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-
-                    cv::Mat temprightframe;
-                    cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                    dispLeftFrame = convertMatToQImage(templeftframe);
-                    dispRightFrame = convertMatToQImage(temprightframe);
-                    send_allImageDisp(dispLeftFrame,dispRightFrame);
+                    if(isFaceDetection_Module)
+                    {
+                        Mat leftfacedetectImage=m_local_algro->faceDetectionFunc(leftcorrectImage);
+                        Mat rightfacedetectImage=m_local_algro->faceDetectionFunc(rightcorrectImage);
+                        cv::Mat templeftframe;
+                        cv::resize(leftfacedetectImage,templeftframe,cv::Size(320,240));
+                        cv::Mat temprightframe;
+                        cv::resize(rightfacedetectImage,temprightframe,cv::Size(320,240));
+                        dispLeftFrame = convertMatToQImage(templeftframe);
+                        dispRightFrame = convertMatToQImage(temprightframe);
+                        send_allImageDisp(dispLeftFrame,dispRightFrame);
+                    }
+                    else
+                    {
+                        cv::Mat templeftframe;
+                        cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
+                        cv::Mat temprightframe;
+                        cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
+                        dispLeftFrame = convertMatToQImage(templeftframe);
+                        dispRightFrame = convertMatToQImage(temprightframe);
+                        send_allImageDisp(dispLeftFrame,dispRightFrame);
+                    }
                 }
             }
             break;
@@ -203,7 +269,7 @@ void ImageThread::run()
                     if(isCaliCam)
                     {
                         m_leftCam->operator >>(oriLeftFrame);
-                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,6))
+                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,20))
                         {
                             cv::Mat templeftframe;
                             cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
@@ -260,7 +326,7 @@ void ImageThread::run()
                     if(isCaliCam)
                     {
                         m_rightCam->operator >>(oriRightFrame);
-                        if(!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,6))
+                        if(!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,20))
                         {
                             cv::Mat temprightframe;
                             cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
@@ -270,10 +336,10 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                          if(m_local_algro->m_CalibrateCamera(false,true))
-                          {
-                              send_isdownCalibration(true);
-                          }
+                            if(m_local_algro->m_CalibrateCamera(false,true))
+                            {
+                                send_isdownCalibration(true);
+                            }
                         }
                     }
                     else
@@ -302,6 +368,29 @@ void ImageThread::run()
         case ALL_CAMERA:
             m_leftCam  = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
             m_rightCam = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
+            while (oriLeftFrame.rows < 2) {
+                m_leftCam->open(0);
+                m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
+                m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                cont = 0;
+                while (oriLeftFrame.rows < 2 && cont<5) {
+                    m_leftCam->operator >>(oriLeftFrame);
+                    cont++;
+                }
+            }
+            while (oriRightFrame.rows < 2) {
+                m_rightCam->open(1);
+                m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
+                m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                cont = 0;
+                while (oriRightFrame.rows < 2 && cont<5) {
+                    m_rightCam->operator >>(oriRightFrame);
+                    cont++;
+                }
+            }
+
             while(1)
             {
                 if(isOpenAllCam)
@@ -320,7 +409,7 @@ void ImageThread::run()
                     {
                         m_leftCam->operator >>(oriLeftFrame);
                         m_rightCam->operator >>(oriRightFrame);
-                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,6)&&!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,6))
+                        if(!m_local_algro->m_LeftCaliPrePoc_1(oriLeftFrame,leftcalibretecamnum,20)&&!m_local_algro->m_RightCaliPrePoc_1(oriRightFrame,rightcalibretecamnum,20))
                         {
                             cv::Mat templeftframe;
                             cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));

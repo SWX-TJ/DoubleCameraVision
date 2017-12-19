@@ -1,4 +1,4 @@
-#include "camerasetting_dialog.h"
+﻿#include "camerasetting_dialog.h"
 #include "ui_camerasetting_dialog.h"
 #include <QDebug>
 #include <QMessageBox>
@@ -7,7 +7,7 @@ CameraSetting_Dialog::CameraSetting_Dialog(QWidget *parent) :
     ui(new Ui::CameraSetting_Dialog)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("摄像头设置"));
+    this->setWindowTitle(QString::fromLocal8Bit("摄像头设置"));
     this->setWindowFlag(Qt::WindowContextHelpButtonHint,false);
     m_calibra = new CalibrationDlg;
     device_num = 0;

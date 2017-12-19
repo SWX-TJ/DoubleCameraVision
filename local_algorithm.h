@@ -1,8 +1,10 @@
-#ifndef LOCAL_ALGORITHM_H
+﻿#ifndef LOCAL_ALGORITHM_H
 #define LOCAL_ALGORITHM_H
 #include<opencv.hpp>
 #include <iostream>
 #include <fstream>
+#include "face_detection.h"
+#include "face_alignment.h"
 using namespace cv;
 using namespace std;
 class Local_Algorithm
@@ -53,6 +55,9 @@ public:
     /***base image process member***/
 
     /*******/
+    /**seeta face detection member***/
+    const char* detection_model_path = "seeta_fd_frontal_v1.0.bin";
+    const char* feature_model_path = "seeta_fa_v1.1.bin";
     /*****local image process function*****/
 public:
     //set image whitebalance
@@ -72,7 +77,9 @@ public:
     //return use innerCammatrix
     vector<Mat> returnLeftCam(void);
     vector<Mat> returnRightCam(void);
-
+ /**seeta face detection***/
+public:
+    Mat faceDetectionFunc(Mat &InputImage);
 };
 
 #endif // LOCAL_ALGORITHM_H

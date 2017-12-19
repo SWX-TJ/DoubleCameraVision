@@ -107,14 +107,14 @@
    </property>
    <widget class="QMenu" name="menuconctSet">
     <property name="title">
-     <string>conctSet</string>
+     <string>连接设置</string>
     </property>
     <addaction name="actionSeriportSet"/>
     <addaction name="actionTcpSet"/>
    </widget>
    <widget class="QMenu" name="menuCamSet">
     <property name="title">
-     <string>CamSet</string>
+     <string>相机设置</string>
     </property>
     <addaction name="actionCamDevSet"/>
     <addaction name="actionImageSet"/>
@@ -133,22 +133,22 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSeriportSet">
    <property name="text">
-    <string>SeriportSet</string>
+    <string>串口设置</string>
    </property>
   </action>
   <action name="actionTcpSet">
    <property name="text">
-    <string>TcpSet</string>
+    <string>服务器设置</string>
    </property>
   </action>
   <action name="actionCamDevSet">
    <property name="text">
-    <string>CamDevSet</string>
+    <string>相机设备设置</string>
    </property>
   </action>
   <action name="actionImageSet">
    <property name="text">
-    <string>ImageSet</string>
+    <string>图像预处理</string>
    </property>
   </action>
  </widget>

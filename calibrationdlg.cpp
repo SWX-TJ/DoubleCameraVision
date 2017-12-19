@@ -1,4 +1,4 @@
-#include "calibrationdlg.h"
+﻿#include "calibrationdlg.h"
 #include "ui_calibrationdlg.h"
 
 CalibrationDlg::CalibrationDlg(QWidget *parent) :
@@ -42,12 +42,12 @@ void CalibrationDlg::on_openCamBtn_clicked()
 
         }
         send_ControlCamInfo(false,false,false);
-        ui->openCamBtn->setText(QString("视觉加载"));
+        ui->openCamBtn->setText(QString::fromLocal8Bit("视觉加载"));
     }
     else
     {
         send_ControlCamInfo(true,true,true);
-        ui->openCamBtn->setText(QString("视觉关闭"));
+        ui->openCamBtn->setText(QString::fromLocal8Bit("视觉关闭"));
     }
 }
 

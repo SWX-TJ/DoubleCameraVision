@@ -1,5 +1,4 @@
-#include "local_algorithm.h"
-
+﻿#include "local_algorithm.h"
 Local_Algorithm::Local_Algorithm()
 {
     leftimage_count = 0;//Left Input Image num
@@ -11,6 +10,7 @@ Local_Algorithm::Local_Algorithm()
     resultLeftCamCal = "left_caliberation_result.txt";
     resultRightCamCal = "right_caliberation_result.txt";
 
+
 }
 
 Mat Local_Algorithm::WhiteBalanceFunc(Mat &InputImage, Mat &outImage, vector<Vec3f> Gen_param)
@@ -21,12 +21,12 @@ Mat Local_Algorithm::WhiteBalanceFunc(Mat &InputImage, Mat &outImage, vector<Vec
 
 Mat Local_Algorithm::ContrastBrightnessFunc(Mat &InputImage, Mat &outImage, vector<Vec2f> param)
 {
-return outImage;
+    return outImage;
 }
 
 Mat Local_Algorithm::BinaryFunc(Mat &InputImage, Mat &outImage, int binary_variety)
 {
-return outImage;
+    return outImage;
 }
 
 bool Local_Algorithm::m_LeftCaliPrePoc_1(Mat &InputImage, int &image_count,int max_calibranum)
@@ -142,7 +142,8 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
         openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
         leftinnerMat.open(LeftinnerMatrixXML,FileStorage::WRITE);
         ofstream fout(resultLeftCamCal);
-        fout<<"左相机标定结果"<<endl;
+        fout<<"left Camera Clibration result"<<endl;
+        //fout<<"左相机标定结果"<<endl;
         string leftfilename;
         while (getline(openLeftCaliImgList,leftfilename))
         {
@@ -155,7 +156,7 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
             }
             if (0 == findChessboardCorners(imageInput,board_size,leftcaliimage_points_buf))
             {
-               return false;
+                return false;
             }
             else
             {
@@ -205,9 +206,9 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
             }
             err = norm(image_points2Mat, tempImagePointMat, NORM_L2);
             total_err += err/=  leftpoint_counts[i];
-            fout<<"第"<<i+1<<"幅图像平均误差："<<err<<"像素"<<endl;
+            fout<<string("The")<<i+1<<string("images average pix err: ")<<err<<string("pix")<<std::endl;
         }
-        fout<<string("总体平均误差：")<<total_err/leftimage_count<<"pix"<<endl<<endl;
+        fout<<string("Total mean err:")<<total_err/leftimage_count<<string("pix")<<endl<<endl;
         Mat rotation_matrix = Mat(3,3,CV_32FC1, Scalar::all(0));
         fout<<string("相机内参数矩阵：")<<endl;
         leftinnerMat<<"LeftInnerCamMatrix"<<leftcameraMatrix;
@@ -247,7 +248,7 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
             }
             if (0 == findChessboardCorners(imageInput,board_size,rightcaliimage_points_buf))
             {
-             return false;
+                return false;
             }
             else
             {
@@ -320,7 +321,7 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
         fout<<endl;
         rightinnerMat.release();
     }
-     return true;
+    return true;
 }
 
 
@@ -354,3 +355,43 @@ vector<Mat> Local_Algorithm::returnRightCam()
     rightinnerMat.release();
     return rightcammatrixs;
 }
+
+Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
+{
+    Mat proInputImage = InputImage.clone();
+    seeta::FaceDetection detector(detection_model_path);
+    seeta::FaceAlignment featuregetor(feature_model_path);
+    detector.SetMinFaceSize(80);
+    detector.SetScoreThresh(2.f);
+    detector.SetImagePyramidScaleFactor(0.8f);
+    detector.SetWindowStep(4, 4);
+    Mat frame1_gray;
+    if (proInputImage.channels() != 1)
+        cv::cvtColor(proInputImage, frame1_gray, cv::COLOR_BGR2GRAY);
+    else
+        frame1_gray = proInputImage;
+    seeta::ImageData frame1_gray_img(frame1_gray.cols, frame1_gray.rows, frame1_gray.channels());
+    frame1_gray_img.data = frame1_gray.data;
+    std::vector<seeta::FaceInfo> faces = detector.Detect(frame1_gray_img);
+    int32_t num_face = static_cast<int32_t>(faces.size());
+    cv::Rect face_rect;
+    for (int32_t i = 0; i < num_face; i++) {
+        face_rect.x = faces[i].bbox.x;
+        face_rect.y = faces[i].bbox.y;
+        face_rect.width = faces[i].bbox.width;
+        face_rect.height = faces[i].bbox.height;
+        cv::rectangle(proInputImage, face_rect, CV_RGB(0, 0, 255), 4, 8, 0);
+    }
+    seeta::FacialLandmark new_points[5];
+    if (num_face != 0)
+    {
+        featuregetor.PointDetectLandmarks(frame1_gray_img, faces[0], new_points);
+        cv::circle(proInputImage, cvPoint(new_points[0].x, new_points[0].y), 2, CV_RGB(0, 200, 0), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[1].x, new_points[1].y), 2, CV_RGB(200, 0, 0), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[2].x, new_points[2].y), 2, CV_RGB(0, 0, 200), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[3].x, new_points[3].y), 2, CV_RGB(100, 100,100), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[4].x, new_points[4].y), 2, CV_RGB(200, 100, 0), CV_FILLED);
+    }
+    return proInputImage;
+}
+

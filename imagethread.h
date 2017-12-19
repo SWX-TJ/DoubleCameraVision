@@ -1,4 +1,4 @@
-#ifndef IMAGETHREAD_H
+﻿#ifndef IMAGETHREAD_H
 #define IMAGETHREAD_H
 #include <QObject>
 #include <QThread>
@@ -42,7 +42,9 @@ public:
     bool isCaliCam;
     int leftcalibretecamnum = 0;
     int rightcalibretecamnum = 0;
-
+    int cont = 0;
+ /*****Module set info*******/
+    bool isFaceDetection_Module;
  //public class
 public:
     QImage convertMatToQImage(cv::Mat &mat);
@@ -60,6 +62,8 @@ public slots:
     void accept_ControlCaminfo(bool leftCamrelea,bool rightCamrelea,bool allCamrelea);
     void accept_CloseCaminfo(bool leftCamrelea, bool rightCamrelea, bool allCamrelea);
     void accept_CaliCaminfo(bool isCaliCame,int board_width,int board_height,int per_board_width,int per_board_height);
+   //accpet module set info
+    void accept_FaceDtetionInfo(bool);
 protected:
     void run();
 };

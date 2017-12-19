@@ -1,4 +1,4 @@
-#ifndef VISIONMAINWINDOW_H
+﻿#ifndef VISIONMAINWINDOW_H
 #define VISIONMAINWINDOW_H
 #include <QMainWindow>
 #include "camerasetting_dialog.h"
@@ -20,17 +20,22 @@ public:
 public:
     CameraSetting_Dialog *m_camSet;
     ImageThread          *m_imgThread;
-  //public member
+    QAction *facedetect_action;
+    QAction *reset_action;
+    //public member
 public:
     bool isLoadCameraPressed;
     bool isfirstloadCameraThread;
+    bool isprocFaceDetetion;
 signals:
     void send_ControlCamInfo(bool,bool,bool);
     void send_CloseCamInfo(bool,bool,bool);
+    void send_isFaceDetetionInof(bool);
 public slots:
     void accept_leftImageDisp(QImage);
     void accept_rightImageDisp(QImage);
     void accept_allImageDisp(QImage,QImage);
+    void process_facedetectionaction(bool);
 private slots:
     void on_actionCamDevSet_triggered();
     void on_ExitBtn_clicked();

@@ -1,4 +1,4 @@
-#include "visionmainwindow.h"
+﻿#include "visionmainwindow.h"
 #include "ui_visionmainwindow.h"
 
 VisionMainWindow::VisionMainWindow(QWidget *parent) :
@@ -9,7 +9,14 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     m_camSet    = new CameraSetting_Dialog;
     m_imgThread = new ImageThread;
     isLoadCameraPressed = false;
+    isprocFaceDetetion  = false;
     isfirstloadCameraThread = true;
+    facedetect_action = new QAction(QString::fromLocal8Bit("人脸检测"),this);
+    reset_action      = new QAction(QString::fromLocal8Bit("重置"),this);
+    addAction(facedetect_action);
+    addAction(reset_action);
+    connect(facedetect_action,SIGNAL(triggered(bool)),this,SLOT(process_facedetectionaction(bool)));
+    setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(m_camSet,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
     connect(m_imgThread,SIGNAL(send_leftImageDisp(QImage)),this,SLOT(accept_leftImageDisp(QImage)),Qt::BlockingQueuedConnection);
@@ -17,6 +24,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     connect(m_imgThread,SIGNAL(send_allImageDisp(QImage,QImage)),this,SLOT(accept_allImageDisp(QImage,QImage)),Qt::BlockingQueuedConnection);
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
+    connect(this,SIGNAL(send_isFaceDetetionInof(bool)),m_imgThread,SLOT(accept_FaceDtetionInfo(bool)));
 }
 
 VisionMainWindow::~VisionMainWindow()
@@ -54,6 +62,21 @@ void VisionMainWindow::accept_allImageDisp(QImage leftImage, QImage rightImage)
     ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
 }
 
+void VisionMainWindow::process_facedetectionaction(bool arg)
+{
+    arg = arg;
+        isprocFaceDetetion = !isprocFaceDetetion;
+        if(isprocFaceDetetion)
+        {
+            send_isFaceDetetionInof(true);
+        }
+        else
+        {
+            send_isFaceDetetionInof(false);
+        }
+
+}
+
 void VisionMainWindow::on_actionCamDevSet_triggered()
 {
     m_camSet->show();
@@ -79,11 +102,11 @@ void VisionMainWindow::on_openVisonbtn_clicked()
 
         }
         send_ControlCamInfo(false,false,false);
-        ui->openVisonbtn->setText(QString("视觉加载"));
+        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉加载"));
     }
     else
     {
         send_ControlCamInfo(true,true,true);
-        ui->openVisonbtn->setText(QString("视觉关闭"));
+        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉关闭"));
     }
 }
