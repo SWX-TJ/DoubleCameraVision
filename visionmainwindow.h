@@ -2,6 +2,7 @@
 #define VISIONMAINWINDOW_H
 #include <QMainWindow>
 #include "camerasetting_dialog.h"
+#include "facecollection.h"
 #include <imagethread.h>
 namespace Ui {
 class VisionMainWindow;
@@ -19,6 +20,7 @@ public:
    //Public User Class
 public:
     CameraSetting_Dialog *m_camSet;
+    FaceCollection       *m_facecollect;
     ImageThread          *m_imgThread;
     QAction *facedetect_action;
     QAction *reset_action;
@@ -40,7 +42,7 @@ private slots:
     void on_actionCamDevSet_triggered();
     void on_ExitBtn_clicked();
     void on_openVisonbtn_clicked();
-
+    void on_actionFaceCollection_triggered();
 private:
     Ui::VisionMainWindow *ui;
 };

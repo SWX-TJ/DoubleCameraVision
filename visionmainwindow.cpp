@@ -8,6 +8,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     ui->setupUi(this);
     m_camSet    = new CameraSetting_Dialog;
     m_imgThread = new ImageThread;
+    m_facecollect = new FaceCollection;
     isLoadCameraPressed = false;
     isprocFaceDetetion  = false;
     isfirstloadCameraThread = true;
@@ -17,6 +18,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     addAction(reset_action);
     connect(facedetect_action,SIGNAL(triggered(bool)),this,SLOT(process_facedetectionaction(bool)));
     setContextMenuPolicy(Qt::ActionsContextMenu);
+    connect(m_facecollect,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
     connect(m_imgThread,SIGNAL(send_leftImageDisp(QImage)),this,SLOT(accept_leftImageDisp(QImage)),Qt::BlockingQueuedConnection);
@@ -40,6 +42,8 @@ void VisionMainWindow::shutSlaveWindowSlot(int num)
     case 1:
         m_camSet->close();
         break;
+    case 2:
+        m_facecollect->close();
     default:
         break;
 
@@ -109,4 +113,9 @@ void VisionMainWindow::on_openVisonbtn_clicked()
         send_ControlCamInfo(true,true,true);
         ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉关闭"));
     }
+}
+
+void VisionMainWindow::on_actionFaceCollection_triggered()
+{
+    m_facecollect->show();
 }

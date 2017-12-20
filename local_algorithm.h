@@ -5,6 +5,7 @@
 #include <fstream>
 #include "face_detection.h"
 #include "face_alignment.h"
+#include "face_identification.h"
 using namespace cv;
 using namespace std;
 class Local_Algorithm
@@ -58,6 +59,7 @@ public:
     /**seeta face detection member***/
     const char* detection_model_path = "seeta_fd_frontal_v1.0.bin";
     const char* feature_model_path = "seeta_fa_v1.1.bin";
+    const char* identification_model_path = "seeta_fr_v1.0.bin";
     /*****local image process function*****/
 public:
     //set image whitebalance
@@ -80,6 +82,7 @@ public:
  /**seeta face detection***/
 public:
     Mat faceDetectionFunc(Mat &InputImage);
+    bool FaceModule_FacePreTrain(Mat &InputImage,float featureArray[]);
 };
 
 #endif // LOCAL_ALGORITHM_H

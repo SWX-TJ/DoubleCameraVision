@@ -31,7 +31,8 @@ SOURCES += \
     cameradevice.cpp \
     imagethread.cpp \
     local_algorithm.cpp \
-    calibrationdlg.cpp
+    calibrationdlg.cpp \
+    facecollection.cpp
 
 HEADERS += \
         visionmainwindow.h \
@@ -41,12 +42,15 @@ HEADERS += \
     local_algorithm.h \
     calibrationdlg.h \
     face_detection.h \
-    face_alignment.h
+    face_alignment.h \
+    face_identification.h \
+    facecollection.h
 
 FORMS += \
         visionmainwindow.ui \
     camerasetting_dialog.ui \
-    calibrationdlg.ui
+    calibrationdlg.ui \
+    facecollection.ui
 
 #INCLUDEPATH += C:/mysoftware/opencvmingw/include
 #INCLUDEPATH += C:/mysoftware/opencvmingw/include/opencv
@@ -90,6 +94,11 @@ INCLUDEPATH += $$PWD/../seeta/build/include
 DEPENDPATH += $$PWD/../seeta/build/include
 
 win32: LIBS += -L$$PWD/../seeta/build/lib/ -lFaceAlignment
+
+INCLUDEPATH += $$PWD/../seeta/build/include
+DEPENDPATH += $$PWD/../seeta/build/include
+
+win32: LIBS += -L$$PWD/../seeta/build/lib/ -lFaceIdentification
 
 INCLUDEPATH += $$PWD/../seeta/build/include
 DEPENDPATH += $$PWD/../seeta/build/include

@@ -395,3 +395,43 @@ Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
     return proInputImage;
 }
 
+bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage, float featureArray[])
+{
+    Mat proInputImage = InputImage.clone();
+    seeta::FaceDetection facedetector(detection_model_path);
+    seeta::FaceAlignment featuregetor(feature_model_path);
+    seeta::FaceIdentification facerecognizer(identification_model_path);
+    facedetector.SetMinFaceSize(80);
+    facedetector.SetScoreThresh(2.f);
+    facedetector.SetImagePyramidScaleFactor(0.8f);
+    facedetector.SetWindowStep(4, 4);
+    Mat frame1_gray;
+    if (proInputImage.channels() != 1)
+        cv::cvtColor(proInputImage, frame1_gray, cv::COLOR_BGR2GRAY);
+    else
+        frame1_gray = proInputImage;
+    seeta::ImageData frame1_gray_img(frame1_gray.cols, frame1_gray.rows, frame1_gray.channels());
+    frame1_gray_img.data = frame1_gray.data;
+    std::vector<seeta::FaceInfo> faces = facedetector.Detect(frame1_gray_img);
+    int32_t num_face = static_cast<int32_t>(faces.size());
+    cv::Rect face_rect;
+    for (int32_t i = 0; i < num_face; i++) {
+        face_rect.x = faces[i].bbox.x;
+        face_rect.y = faces[i].bbox.y;
+        face_rect.width = faces[i].bbox.width;
+        face_rect.height = faces[i].bbox.height;
+        cv::rectangle(proInputImage, face_rect, CV_RGB(0, 0, 255), 4, 8, 0);
+    }
+    seeta::FacialLandmark new_points[5];
+    if (num_face != 0)
+    {
+        featuregetor.PointDetectLandmarks(frame1_gray_img, faces[0], new_points);
+        cv::circle(proInputImage, cvPoint(new_points[0].x, new_points[0].y), 2, CV_RGB(0, 200, 0), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[1].x, new_points[1].y), 2, CV_RGB(200, 0, 0), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[2].x, new_points[2].y), 2, CV_RGB(0, 0, 200), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[3].x, new_points[3].y), 2, CV_RGB(100, 100,100), CV_FILLED);
+        cv::circle(proInputImage, cvPoint(new_points[4].x, new_points[4].y), 2, CV_RGB(200, 100, 0), CV_FILLED);
+    }
+    return true;
+}
+

@@ -119,8 +119,15 @@
     <addaction name="actionCamDevSet"/>
     <addaction name="actionImageSet"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>功能包设置</string>
+    </property>
+    <addaction name="actionFaceCollection"/>
+   </widget>
    <addaction name="menuconctSet"/>
    <addaction name="menuCamSet"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -149,6 +156,11 @@
   <action name="actionImageSet">
    <property name="text">
     <string>图像预处理</string>
+   </property>
+  </action>
+  <action name="actionFaceCollection">
+   <property name="text">
+    <string>人脸采集</string>
    </property>
   </action>
  </widget>
