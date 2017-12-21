@@ -82,7 +82,7 @@ public:
  /**seeta face detection***/
 public:
     Mat faceDetectionFunc(Mat &InputImage);
-    bool FaceModule_FacePreTrain(Mat &InputImage,float featureArray[]);
+    bool FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[]);
 };
 
 #endif // LOCAL_ALGORITHM_H

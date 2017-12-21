@@ -1,4 +1,4 @@
-#ifndef CALIBRATIONDLG_H
+﻿#ifndef CALIBRATIONDLG_H
 #define CALIBRATIONDLG_H
 #include <QDialog>
 #include <imagethread.h>
@@ -43,11 +43,14 @@ public:
     int temp_board_height;
     int temp_perboard_width;
     int temp_perboard_height;
+    QImage leftImage;
+    QImage rightImage;
 public slots:
-    void accept_leftCaliImageDisp(QImage);
-    void accept_rightCaliImageDisp(QImage);
-    void accept_allCaliImageDisp(QImage,QImage);
     void accept_isdownCalibration(bool);
+   // accept disp func v1.0
+    void new_accept_leftCaliImageDisp(Mat);
+    void new_accept_rightCaliImageDisp(Mat);
+    void new_accept_allCaliImageDisp(Mat,Mat);
 private:
     Ui::CalibrationDlg *ui;
 };

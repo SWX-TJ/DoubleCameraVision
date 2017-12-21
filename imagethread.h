@@ -6,6 +6,7 @@
 #include <cameradevice.h>
 #include <opencv.hpp>
 #include <local_algorithm.h>
+#include <QMetaType>
 #define DEFAULT_CAMERA 0
 #define LEFT_CAMERA  1
 #define RIGHT_CAMERA 2
@@ -43,27 +44,24 @@ public:
     int leftcalibretecamnum = 0;
     int rightcalibretecamnum = 0;
     int cont = 0;
- /*****Module set info*******/
-    bool isFaceDetection_Module;
  //public class
 public:
     QImage convertMatToQImage(cv::Mat &mat);
 signals:
-    void send_leftImageDisp(QImage);//disp left frame
-    void send_rightImageDisp(QImage);//disp right frame
-    void send_allImageDisp(QImage,QImage);//disp all frame
-    void send_leftCaliImageDisp(QImage);//disp cali left frame
-    void send_rightCaliImageDisp(QImage);//disp cali right frame
-    void send_allCaliImageDisp(QImage,QImage);//disp cali all frame
-    void send_isdownCalibration(bool);//show is finish calibration or not
+   void send_isdownCalibration(bool);//show is finish calibration or not
+// send_disp func v1.0
+    void new_send_leftImageDisp(Mat);//disp left frame
+    void new_send_rightImageDisp(Mat);//disp right frame
+    void new_send_allImageDisp(Mat,Mat);//disp all frame
+    void new_send_leftCaliImageDisp(Mat);//disp cali left frame
+    void new_send_rightCaliImageDisp(Mat);//disp cali right frame
+    void new_send_allCaliImageDisp(Mat,Mat);//disp cali all frame
 public slots:
     //accept camera set info
     void accept_CamSetInfo(int leftCamindex = 0,bool isleftSelect = false,int rightCamindex =0,bool isrightSelect = false,bool AllSelect = false,int camMode =1);
     void accept_ControlCaminfo(bool leftCamrelea,bool rightCamrelea,bool allCamrelea);
     void accept_CloseCaminfo(bool leftCamrelea, bool rightCamrelea, bool allCamrelea);
     void accept_CaliCaminfo(bool isCaliCame,int board_width,int board_height,int per_board_width,int per_board_height);
-   //accpet module set info
-    void accept_FaceDtetionInfo(bool);
 protected:
     void run();
 };

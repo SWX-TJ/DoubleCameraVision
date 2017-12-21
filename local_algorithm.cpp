@@ -395,7 +395,7 @@ Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
     return proInputImage;
 }
 
-bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage, float featureArray[])
+ bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[])
 {
     Mat proInputImage = InputImage.clone();
     seeta::FaceDetection facedetector(detection_model_path);
@@ -410,6 +410,8 @@ bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage, float featureArra
         cv::cvtColor(proInputImage, frame1_gray, cv::COLOR_BGR2GRAY);
     else
         frame1_gray = proInputImage;
+    seeta::ImageData frame1_img(proInputImage.cols, proInputImage.rows, proInputImage.channels());
+    frame1_img.data = proInputImage.data;
     seeta::ImageData frame1_gray_img(frame1_gray.cols, frame1_gray.rows, frame1_gray.channels());
     frame1_gray_img.data = frame1_gray.data;
     std::vector<seeta::FaceInfo> faces = facedetector.Detect(frame1_gray_img);
@@ -431,7 +433,9 @@ bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage, float featureArra
         cv::circle(proInputImage, cvPoint(new_points[2].x, new_points[2].y), 2, CV_RGB(0, 0, 200), CV_FILLED);
         cv::circle(proInputImage, cvPoint(new_points[3].x, new_points[3].y), 2, CV_RGB(100, 100,100), CV_FILLED);
         cv::circle(proInputImage, cvPoint(new_points[4].x, new_points[4].y), 2, CV_RGB(200, 100, 0), CV_FILLED);
+        facerecognizer.ExtractFeatureWithCrop(frame1_img, new_points, featureArray);
     }
+    OutImage = proInputImage.clone();
     return true;
 }
 

@@ -12,6 +12,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     isLoadCameraPressed = false;
     isprocFaceDetetion  = false;
     isfirstloadCameraThread = true;
+    qRegisterMetaType<Mat>("Mat");
     facedetect_action = new QAction(QString::fromLocal8Bit("人脸检测"),this);
     reset_action      = new QAction(QString::fromLocal8Bit("重置"),this);
     addAction(facedetect_action);
@@ -19,14 +20,14 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     connect(facedetect_action,SIGNAL(triggered(bool)),this,SLOT(process_facedetectionaction(bool)));
     setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(m_facecollect,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
+    connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_facecollect->m_facecollectThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
     connect(m_camSet,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
-    connect(m_imgThread,SIGNAL(send_leftImageDisp(QImage)),this,SLOT(accept_leftImageDisp(QImage)),Qt::BlockingQueuedConnection);
-    connect(m_imgThread,SIGNAL(send_rightImageDisp(QImage)),this,SLOT(accept_rightImageDisp(QImage)),Qt::BlockingQueuedConnection);
-    connect(m_imgThread,SIGNAL(send_allImageDisp(QImage,QImage)),this,SLOT(accept_allImageDisp(QImage,QImage)),Qt::BlockingQueuedConnection);
+    connect(m_imgThread,SIGNAL(new_send_leftImageDisp(Mat)),this,SLOT(new_accept_leftImageDisp(Mat)),Qt::BlockingQueuedConnection);
+    connect(m_imgThread,SIGNAL(new_send_rightImageDisp(Mat)),this,SLOT(new_accept_rightImageDisp(Mat)),Qt::BlockingQueuedConnection);
+    connect(m_imgThread,SIGNAL(new_send_allImageDisp(Mat,Mat)),this,SLOT(new_accept_allImageDisp(Mat,Mat)),Qt::BlockingQueuedConnection);
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
-    connect(this,SIGNAL(send_isFaceDetetionInof(bool)),m_imgThread,SLOT(accept_FaceDtetionInfo(bool)));
 }
 
 VisionMainWindow::~VisionMainWindow()
@@ -50,35 +51,32 @@ void VisionMainWindow::shutSlaveWindowSlot(int num)
     }
 }
 
-void VisionMainWindow::accept_leftImageDisp(QImage leftImage)
-{
-    ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
-}
-
-void VisionMainWindow::accept_rightImageDisp(QImage rightImage)
-{
-    ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
-}
-
-void VisionMainWindow::accept_allImageDisp(QImage leftImage, QImage rightImage)
-{
-    ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
-    ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
-}
 
 void VisionMainWindow::process_facedetectionaction(bool arg)
 {
-    arg = arg;
+        arg = arg;
         isprocFaceDetetion = !isprocFaceDetetion;
-        if(isprocFaceDetetion)
-        {
-            send_isFaceDetetionInof(true);
-        }
-        else
-        {
-            send_isFaceDetetionInof(false);
-        }
 
+}
+
+void VisionMainWindow::new_accept_leftImageDisp(Mat leftMatImage)
+{
+ leftImage = m_imgThread->convertMatToQImage(leftMatImage);
+ ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+}
+
+void VisionMainWindow::new_accept_rightImageDisp(Mat rightMatImage)
+{
+   rightImage = m_imgThread->convertMatToQImage(rightMatImage);
+   ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+}
+
+void VisionMainWindow::new_accept_allImageDisp(Mat leftMatImage, Mat rightMatImage)
+{
+    leftImage = m_imgThread->convertMatToQImage(leftMatImage);
+    ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+    rightImage = m_imgThread->convertMatToQImage(rightMatImage);
+    ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
 }
 
 void VisionMainWindow::on_actionCamDevSet_triggered()
