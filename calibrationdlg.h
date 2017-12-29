@@ -18,6 +18,7 @@ public:
     ~CalibrationDlg();
 signals:
     void send_returnMainWinSignal(int);
+    void send_resetDeviceInfo(void);
     void send_ControlCamInfo(bool,bool,bool);
     void send_CloseCamInfo(bool,bool,bool);
     void send_CalibraCamInfo(bool,int,int,int,int);

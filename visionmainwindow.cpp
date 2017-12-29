@@ -21,6 +21,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     setContextMenuPolicy(Qt::ActionsContextMenu);
     connect(m_facecollect,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_facecollect->m_facecollectThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
+    connect(m_facecollect,SIGNAL(send_ResetInfo()),m_camSet,SLOT(accept_returnResetSignals()));
     connect(m_camSet,SIGNAL(returnSignal(int)),this,SLOT(shutSlaveWindowSlot(int)));
     connect(m_camSet,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_imgThread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
     connect(m_imgThread,SIGNAL(new_send_leftImageDisp(Mat)),this,SLOT(new_accept_leftImageDisp(Mat)),Qt::BlockingQueuedConnection);

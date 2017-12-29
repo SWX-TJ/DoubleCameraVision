@@ -21,7 +21,6 @@ CalibrationDlg::CalibrationDlg(QWidget *parent) :
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_calithread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_calithread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CalibraCamInfo(bool,int,int,int,int)),m_calithread,SLOT(accept_CaliCaminfo(bool,int,int,int,int)));
-
 }
 
 CalibrationDlg::~CalibrationDlg()
@@ -56,24 +55,10 @@ void CalibrationDlg::on_saveBtn_clicked()
     send_CloseCamInfo(true,true,true);
     m_calithread->quit();
     m_calithread->wait();
+    send_resetDeviceInfo();
     send_returnMainWinSignal(1);
 }
 
-//void CalibrationDlg::accept_leftCaliImageDisp(QImage leftImg)
-//{
-//    ui->leftImage_disp->setPixmap(QPixmap::fromImage(leftImg));
-//}
-
-//void CalibrationDlg::accept_rightCaliImageDisp(QImage rightImg)
-//{
-//    ui->rightImage_disp->setPixmap(QPixmap::fromImage(rightImg));
-//}
-
-//void CalibrationDlg::accept_allCaliImageDisp(QImage leftImg, QImage rightImg)
-//{
-//    ui->leftImage_disp->setPixmap(QPixmap::fromImage(leftImg));
-//    ui->rightImage_disp->setPixmap(QPixmap::fromImage(rightImg));
-//}
 
 void CalibrationDlg::accept_isdownCalibration(bool isdownCalibration)
 {

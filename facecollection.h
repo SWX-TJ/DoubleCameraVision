@@ -26,12 +26,14 @@ public:
     bool isfirstloadCameraThread;
     bool isFaceCollection;
     QImage leftImage;
+    QFile facedabase;
 public:
     ImageThread *m_facecollectThread;
     Local_Algorithm *m_algorim;
 signals:
     void send_ControlCamInfo(bool,bool,bool);
     void send_CloseCamInfo(bool,bool,bool);
+    void send_ResetInfo();
 public slots:
     // accept disp func v1.0
      void new_accept_leftImageDisp(Mat);

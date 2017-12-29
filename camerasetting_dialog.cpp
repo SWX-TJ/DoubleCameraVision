@@ -27,6 +27,7 @@ CameraSetting_Dialog::CameraSetting_Dialog(QWidget *parent) :
     }
     connect(m_calibra,SIGNAL(send_returnMainWinSignal(int)),this,SLOT(accept_returnSlaveWindowsignal(int)));
     connect(this,SIGNAL(send_CamSetInfo(int,bool,int,bool,bool,int)),m_calibra->m_calithread,SLOT(accept_CamSetInfo(int,bool,int,bool,bool,int)));
+    connect(m_calibra,SIGNAL(send_resetDeviceInfo()),this,SLOT(accept_returnResetSignals()));
 }
 
 CameraSetting_Dialog::~CameraSetting_Dialog()
@@ -39,18 +40,22 @@ void CameraSetting_Dialog::accept_returnSlaveWindowsignal(int WinNum)
     if(WinNum==1)
     {
         m_calibra->close();
-        device_num = 0;
-        CameraUseNumFlag = 0;
-        leftCameraEnable = false;
-        rightCameraEnable = false;
-        if(ui->leftEnable_btn->isChecked())
-        {
-            ui->leftEnable_btn->setChecked(false);
-        }
-        if(ui->rightEnable_btn->isChecked())
-        {
-            ui->rightEnable_btn->setChecked(false);
-        }
+    }
+}
+
+void CameraSetting_Dialog::accept_returnResetSignals()
+{
+    device_num = 0;
+    CameraUseNumFlag = 0;
+    leftCameraEnable = false;
+    rightCameraEnable = false;
+    if(ui->leftEnable_btn->isChecked())
+    {
+        ui->leftEnable_btn->setChecked(false);
+    }
+    if(ui->rightEnable_btn->isChecked())
+    {
+        ui->rightEnable_btn->setChecked(false);
     }
 }
 
@@ -60,10 +65,12 @@ void CameraSetting_Dialog::on_SettingBtn_clicked()
     case 1:
         if(leftCameraEnable)
         {
+             QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,1);
         }
         else if(rightCameraEnable)
         {
+                       QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,1);
         }
         leftCameraEnable = false;
@@ -126,10 +133,12 @@ void CameraSetting_Dialog::on_CalibrationSingleCamera_clicked()
     case 1:
         if(leftCameraEnable)
         {
+             QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,0);
         }
         else if(rightCameraEnable)
         {
+           QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,0);
         }
         leftCameraEnable = false;

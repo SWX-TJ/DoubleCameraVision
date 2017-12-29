@@ -1,4 +1,4 @@
-#ifndef CAMERASETTING_DIALOG_H
+﻿#ifndef CAMERASETTING_DIALOG_H
 #define CAMERASETTING_DIALOG_H
 #include <QDialog>
 #include <QCamera>
@@ -35,6 +35,7 @@ public:
     bool rightCameraEnable;//使能点击状态
 public slots:
     void accept_returnSlaveWindowsignal(int);
+    void accept_returnResetSignals(void);
 private slots:
     void on_SettingBtn_clicked();
     void on_ReturnBtn_clicked();
