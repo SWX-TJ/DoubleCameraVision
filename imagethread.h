@@ -35,6 +35,7 @@ public:
     bool iscloseLeftCam;
     bool iscloseRightCam;
     bool iscloseAllCam;
+    bool isneedCamCali;
     int CamSelect;
  /*set how use this thread*/
  /*@parm: CaliMode*/
@@ -58,6 +59,7 @@ signals:
     void new_send_allCaliImageDisp(Mat,Mat);//disp cali all frame
 public slots:
     //accept camera set info
+    void accept_isneedCamcali(bool);
     void accept_CamSetInfo(int leftCamindex = 0,bool isleftSelect = false,int rightCamindex =0,bool isrightSelect = false,bool AllSelect = false,int camMode =1);
     void accept_ControlCaminfo(bool leftCamrelea,bool rightCamrelea,bool allCamrelea);
     void accept_CloseCaminfo(bool leftCamrelea, bool rightCamrelea, bool allCamrelea);

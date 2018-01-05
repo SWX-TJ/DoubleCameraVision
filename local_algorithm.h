@@ -3,6 +3,7 @@
 #include<opencv.hpp>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "face_detection.h"
 #include "face_alignment.h"
 #include "face_identification.h"
@@ -60,6 +61,13 @@ public:
     const char* detection_model_path = "seeta_fd_frontal_v1.0.bin";
     const char* feature_model_path = "seeta_fa_v1.1.bin";
     const char* identification_model_path = "seeta_fr_v1.0.bin";
+    vector<seeta::FacialLandmark*>face_feature;
+    vector<float*> vilada_feature;
+    string facedateBaseFile;
+
+
+    vector<vector<float>>extral_face_feature_datebase;//从数据库读取的人脸特征数据
+    vector<string>extral_face_name_datebase;//从数据库读取的人脸姓名数据
     /*****local image process function*****/
 public:
     //set image whitebalance
@@ -81,6 +89,8 @@ public:
     vector<Mat> returnRightCam(void);
  /**seeta face detection***/
 public:
+     bool get_facedateBase(vector<vector<float>>&,vector<string>&);
+     bool public_getfacedateBase(void);
     Mat faceDetectionFunc(Mat &InputImage);
     bool FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[]);
 };

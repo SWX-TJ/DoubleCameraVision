@@ -13,7 +13,9 @@ FaceCollection::FaceCollection(QWidget *parent) :
     isfirstloadCameraThread = true;
     m_facecollectThread = new ImageThread;
     m_algorim = new Local_Algorithm;
+    connect(this,SIGNAL(send_isneedCamCali(bool)),m_facecollectThread,SLOT(accept_isneedCamcali(bool)));
     connect(m_facecollectThread,SIGNAL(new_send_leftImageDisp(Mat)),this,SLOT(new_accept_leftImageDisp(Mat)));
+    connect(m_facecollectThread,SIGNAL(new_send_rightImageDisp(Mat)),this,SLOT(new_accept_leftImageDisp(Mat)));
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_facecollectThread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_facecollectThread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
 }
@@ -94,14 +96,24 @@ void FaceCollection::on_SetBtn_clicked()
         isLoadCameraPressed = !isLoadCameraPressed;
         if(isLoadCameraPressed)
         {
-            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("相机已经打开"));
+
             if(isfirstloadCameraThread)
             {
                 isfirstloadCameraThread = false;
+                QMessageBox::StandardButton rb = QMessageBox::question(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("您的相机是否已经标定，电脑摄像头，网络免驱摄像头或者手机摄像头一般已经标记过，请选择yes,其他选择no"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                if(rb == QMessageBox::No)
+                {
+                    send_isneedCamCali(true);
+                }
+                else
+                {
+                     send_isneedCamCali(false);
+                }
                 m_facecollectThread->start();
 
             }
             send_ControlCamInfo(false,false,false);
+            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("相机已经打开"));
         }
         else
         {

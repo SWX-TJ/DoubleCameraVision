@@ -4,6 +4,7 @@
 #include "camerasetting_dialog.h"
 #include "facecollection.h"
 #include <imagethread.h>
+#include <local_algorithm.h>
 namespace Ui {
 class VisionMainWindow;
 }
@@ -31,10 +32,13 @@ public:
     bool isprocFaceDetetion;
     QImage leftImage;
     QImage rightImage;
+    //Test this is test face detection
+    Local_Algorithm *m_local;
 signals:
     void send_ControlCamInfo(bool,bool,bool);
     void send_CloseCamInfo(bool,bool,bool);
     void send_isFaceDetetionInof(bool);
+    void send_isneeedCamCali(bool);
 public slots:
     void process_facedetectionaction(bool);
 
@@ -47,6 +51,8 @@ private slots:
     void on_ExitBtn_clicked();
     void on_openVisonbtn_clicked();
     void on_actionFaceCollection_triggered();
+    void on_LoadDllBtn_clicked();
+
 private:
     Ui::VisionMainWindow *ui;
 };

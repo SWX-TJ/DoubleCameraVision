@@ -5,17 +5,16 @@ Local_Algorithm::Local_Algorithm()
     rightimage_count = 0;//Right Input Image num
     LeftCaliCamFileLisrInfo = "LeftCaliImageInfo.txt";
     RightCaliCamFileLisrInfo = "RightCaliImageInfo.txt";
+    facedateBaseFile = "facedabase.csv";
     LeftinnerMatrixXML = "leftcaminnerMat.xml";
     RightinnerMatrixXML = "rightcaminnerMat.xml";
     resultLeftCamCal = "left_caliberation_result.txt";
     resultRightCamCal = "right_caliberation_result.txt";
-
-
+    //
 }
 
 Mat Local_Algorithm::WhiteBalanceFunc(Mat &InputImage, Mat &outImage, vector<Vec3f> Gen_param)
 {
-
     return outImage;
 }
 
@@ -356,11 +355,77 @@ vector<Mat> Local_Algorithm::returnRightCam()
     return rightcammatrixs;
 }
 
+bool Local_Algorithm::get_facedateBase(vector<vector<float>> &face_feature_datebase, vector<string> &face_name_datebase)
+{
+    ifstream readfile;
+    readfile.open(facedateBaseFile);
+    if(!readfile.is_open())
+    {
+        return false;
+    }
+    string fileline;
+    string face_name;
+    stringstream ss;
+    vector<float>facedate;
+    float dateface[2048];
+    float aa;
+    int i = 0;
+    int name_sum = 0;
+    while (getline(readfile,fileline))
+    {
+        int point_pos = fileline.find(',');
+        while(point_pos!=string::npos)
+        {
+            fileline = fileline.replace(point_pos, 1, 1, ' ');
+            point_pos = fileline.find(',');
+        }
+        ss << fileline;
+        while (ss)
+        {
+            if(i==2048)
+            {
+                i = 0;
+                face_feature_datebase.push_back(facedate);
+                ss>>face_name;
+                face_name_datebase.push_back(face_name);
+                face_name.clear();
+                name_sum++;
+                break;
+            }
+            ss >> dateface[i];
+            facedate.push_back(dateface[i]);
+            i++;
+        }
+        fileline.clear();
+        point_pos = 0;
+        facedate.clear();
+        ss.clear();
+    }
+    readfile.close();
+    return true;
+}
+
+bool Local_Algorithm::public_getfacedateBase()
+{
+    extral_face_feature_datebase.clear();
+    extral_face_name_datebase.clear();
+    if(get_facedateBase(extral_face_feature_datebase,extral_face_name_datebase))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
+
 Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
 {
     Mat proInputImage = InputImage.clone();
     seeta::FaceDetection detector(detection_model_path);
     seeta::FaceAlignment featuregetor(feature_model_path);
+    seeta::FaceIdentification identitor(identification_model_path);
     detector.SetMinFaceSize(80);
     detector.SetScoreThresh(2.f);
     detector.SetImagePyramidScaleFactor(0.8f);
@@ -370,6 +435,8 @@ Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
         cv::cvtColor(proInputImage, frame1_gray, cv::COLOR_BGR2GRAY);
     else
         frame1_gray = proInputImage;
+    seeta::ImageData frame1_img(proInputImage.cols, proInputImage.rows, proInputImage.channels());
+    frame1_img.data = proInputImage.data;
     seeta::ImageData frame1_gray_img(frame1_gray.cols, frame1_gray.rows, frame1_gray.channels());
     frame1_gray_img.data = frame1_gray.data;
     std::vector<seeta::FaceInfo> faces = detector.Detect(frame1_gray_img);
@@ -382,20 +449,48 @@ Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
         face_rect.height = faces[i].bbox.height;
         cv::rectangle(proInputImage, face_rect, CV_RGB(0, 0, 255), 4, 8, 0);
     }
-    seeta::FacialLandmark new_points[5];
-    if (num_face != 0)
+    for(int32_t i =0;i<num_face;i++)
     {
-        featuregetor.PointDetectLandmarks(frame1_gray_img, faces[0], new_points);
-        cv::circle(proInputImage, cvPoint(new_points[0].x, new_points[0].y), 2, CV_RGB(0, 200, 0), CV_FILLED);
-        cv::circle(proInputImage, cvPoint(new_points[1].x, new_points[1].y), 2, CV_RGB(200, 0, 0), CV_FILLED);
-        cv::circle(proInputImage, cvPoint(new_points[2].x, new_points[2].y), 2, CV_RGB(0, 0, 200), CV_FILLED);
-        cv::circle(proInputImage, cvPoint(new_points[3].x, new_points[3].y), 2, CV_RGB(100, 100,100), CV_FILLED);
-        cv::circle(proInputImage, cvPoint(new_points[4].x, new_points[4].y), 2, CV_RGB(200, 100, 0), CV_FILLED);
+        seeta::FacialLandmark new_points[5];
+        featuregetor.PointDetectLandmarks(frame1_gray_img, faces[i], new_points);
+        face_feature.push_back(new_points);
+        float valida_fea[2048];
+        int final_j_name = -1;
+        identitor.ExtractFeatureWithCrop(frame1_img, new_points, valida_fea);
+        float max_sim=0;
+        for(int j = 0;j<extral_face_feature_datebase.size();j++)
+        {
+            float new_valida[2048];
+            for(int k = 0;k<2048;k++)
+            {
+                new_valida[k] = extral_face_feature_datebase.at(j).at(k);
+            }
+            float temp_sim = identitor.CalcSimilarity(new_valida, valida_fea);
+            // cout<<"this is "<<j<<" time"<<temp_sim<<endl;
+            if(temp_sim>=max_sim&&temp_sim>0.5)
+            {
+                max_sim = temp_sim;
+                final_j_name = j;
+            }
+        }
+        if(final_j_name!=-1)
+        {
+        putText(proInputImage,extral_face_name_datebase.at(final_j_name),Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
+        final_j_name = -1;
+        max_sim= 0;
+        }
+        else
+        {
+             putText(proInputImage,"unknown people",Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
+            final_j_name = -1;
+            max_sim= 0;
+        }
+        face_feature.clear();
     }
     return proInputImage;
 }
 
- bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[])
+bool Local_Algorithm::FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[])
 {
     Mat proInputImage = InputImage.clone();
     seeta::FaceDetection facedetector(detection_model_path);

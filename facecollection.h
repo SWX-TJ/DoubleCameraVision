@@ -34,6 +34,7 @@ signals:
     void send_ControlCamInfo(bool,bool,bool);
     void send_CloseCamInfo(bool,bool,bool);
     void send_ResetInfo();
+    void send_isneedCamCali(bool);
 public slots:
     // accept disp func v1.0
      void new_accept_leftImageDisp(Mat);

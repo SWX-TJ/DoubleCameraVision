@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>相机标定</string>
   </property>
   <widget class="QLabel" name="leftImage_disp">
    <property name="geometry">
@@ -183,14 +183,6 @@
     </item>
    </layout>
   </widget>
-  <zorder>leftImage_disp</zorder>
-  <zorder>rightImage_disp</zorder>
-  <zorder>openCamBtn</zorder>
-  <zorder>CalibraBtn</zorder>
-  <zorder>saveBtn</zorder>
-  <zorder>resultTxtEdit</zorder>
-  <zorder>gridLayoutWidget</zorder>
-  <zorder>label</zorder>
  </widget>
  <resources/>
  <connections/>

@@ -65,19 +65,28 @@ void CameraSetting_Dialog::on_SettingBtn_clicked()
     case 1:
         if(leftCameraEnable)
         {
-             QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
+            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,1);
         }
         else if(rightCameraEnable)
         {
-                       QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
+            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,1);
         }
         leftCameraEnable = false;
         rightCameraEnable = false;
         break;
     case 2:
-        send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,true,1);
+        if(leftCameraIndex!=rightCameraIndex)
+        {
+            send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,true,1);
+         QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左右摄像头打开"));
+        }
+        else
+        {
+            QMessageBox::information(this,"Setting ERROR",QString::fromLocal8Bit("左右相机不能打开同一设备！"));
+        accept_returnResetSignals();
+        }
         break;
     default:
         QMessageBox::information(this,"Setting ERROR","there is no device");
@@ -133,19 +142,28 @@ void CameraSetting_Dialog::on_CalibrationSingleCamera_clicked()
     case 1:
         if(leftCameraEnable)
         {
-             QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
+            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,0);
         }
         else if(rightCameraEnable)
         {
-           QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
+            QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("右摄像头打开"));
             send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,false,0);
         }
         leftCameraEnable = false;
         rightCameraEnable = false;
         break;
     case 2:
+        if(leftCameraIndex !=rightCameraIndex)
+        {
         send_CamSetInfo(leftCameraIndex,leftCameraEnable,rightCameraIndex,rightCameraEnable,true,0);
+         QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("左右摄像头打开"));
+        }
+        else
+        {
+            QMessageBox::information(this,"Setting ERROR",QString::fromLocal8Bit("左右相机不能打开同一设备！"));
+        accept_returnResetSignals();
+        }
         break;
     default:
         QMessageBox::information(this,"Setting ERROR","there is no device");

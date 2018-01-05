@@ -13,6 +13,7 @@ ImageThread::ImageThread()
     iscloseRightCam =  false;
     iscloseAllCam   =  false;
     isCaliCam       =  false;
+    isneedCamCali   =  true;
     ControlCamSet = Mode_ProcCAM;
     qRegisterMetaType<Mat>("Mat");
 }
@@ -36,6 +37,12 @@ QImage ImageThread::convertMatToQImage(cv::Mat &mat)
     }
 
     return img;
+}
+
+void ImageThread::accept_isneedCamcali(bool arg)
+{
+
+    isneedCamCali = arg;
 }
 
 void ImageThread::accept_CamSetInfo(int leftCamindex, bool isleftSelect, int rightCamindex, bool isrightSelect, bool AllSelect,int camMode)
@@ -97,17 +104,25 @@ void ImageThread::run()
         m_local_algro->returnRightCam();
         switch (CamSelect) {
         case LEFT_CAMERA:
-            m_leftCam = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
-            while (oriLeftFrame.rows < 2) {
-                m_leftCam->open(0);
-                m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
-                m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
-                m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
-                cont = 0;
-                while (oriLeftFrame.rows < 2 && cont<5) {
-                    m_leftCam->operator >>(oriLeftFrame);
-                    cont++;
+            if(isneedCamCali)
+            {
+
+                m_leftCam = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
+                while (oriLeftFrame.rows < 2) {
+                    m_leftCam->open(0);
+                    m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
+                    m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                    m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                    cont = 0;
+                    while (oriLeftFrame.rows < 2 && cont<5) {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        cont++;
+                    }
                 }
+            }
+            else
+            {
+                m_leftCam = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
             }
             while(1)
             {
@@ -121,27 +136,44 @@ void ImageThread::run()
                 }
                 else
                 {
-                    m_leftCam->operator >>(oriLeftFrame);
-                    cv::Mat leftcorrectImage;
-                    undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-                    cv::Mat templeftframe;
-                    cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
-                    new_send_leftImageDisp(templeftframe);
+                    if(isneedCamCali)
+                    {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        cv::Mat leftcorrectImage;
+                        undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
+                        cv::Mat templeftframe;
+                        cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
+                        new_send_leftImageDisp(templeftframe);
+                    }
+                    else
+                    {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        cv::Mat templeftframe;
+                        cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
+                        new_send_leftImageDisp(templeftframe);
+                    }
                 }
             }
             break;
         case RIGHT_CAMERA:
-            m_rightCam    = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
-            while (oriRightFrame.rows < 2) {
-                m_rightCam->open(1);
-                m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
-                m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
-                m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
-                cont = 0;
-                while (oriRightFrame.rows < 2 && cont<5) {
-                    m_rightCam->operator >>(oriRightFrame);
-                    cont++;
+            if(isneedCamCali)
+            {
+                m_rightCam    = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
+                while (oriRightFrame.rows < 2) {
+                    m_rightCam->open(1);
+                    m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
+                    m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                    m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                    cont = 0;
+                    while (oriRightFrame.rows < 2 && cont<5) {
+                        m_rightCam->operator >>(oriRightFrame);
+                        cont++;
+                    }
                 }
+            }
+            else
+            {
+                m_rightCam    = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
             }
 
             while(1)
@@ -156,40 +188,57 @@ void ImageThread::run()
                 }
                 else
                 {
-                    m_rightCam->operator >>(oriRightFrame);
-                    cv::Mat rightcorrectImage;
-                    undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-                    cv::Mat temprightframe;
-                    cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                    new_send_rightImageDisp(temprightframe);
+                    if(isneedCamCali)
+                    {
+                        m_rightCam->operator >>(oriRightFrame);
+                        cv::Mat rightcorrectImage;
+                        undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                        cv::Mat temprightframe;
+                        cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
+                        new_send_rightImageDisp(temprightframe);
+                    }
+                    else
+                    {
+                        m_rightCam->operator >>(oriRightFrame);
+                        cv::Mat temprightframe;
+                        cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
+                        new_send_rightImageDisp(temprightframe);
+                    }
                 }
             }
             break;
         case ALL_CAMERA:
-            m_leftCam  = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
-            m_rightCam = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
-
-            while (oriLeftFrame.rows < 2) {
-                m_leftCam->open(0);
-                m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
-                m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
-                m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
-                cont = 0;
-                while (oriLeftFrame.rows < 2 && cont<5) {
-                    m_leftCam->operator >>(oriLeftFrame);
-                    cont++;
+            if(isneedCamCali)
+            {
+                m_leftCam  = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
+                m_rightCam = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
+                while (oriLeftFrame.rows < 2) {
+                    m_leftCam->open(0);
+                    m_leftCam->set(CAP_PROP_FOURCC, 'GPJM');
+                    m_leftCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                    m_leftCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                    cont = 0;
+                    while (oriLeftFrame.rows < 2 && cont<5) {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        cont++;
+                    }
+                }
+                while (oriRightFrame.rows < 2) {
+                    m_rightCam->open(1);
+                    m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
+                    m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
+                    m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
+                    cont = 0;
+                    while (oriRightFrame.rows < 2 && cont<5) {
+                        m_rightCam->operator >>(oriRightFrame);
+                        cont++;
+                    }
                 }
             }
-            while (oriRightFrame.rows < 2) {
-                m_rightCam->open(1);
-                m_rightCam->set(CAP_PROP_FOURCC, 'GPJM');
-                m_rightCam->set(CAP_PROP_FRAME_WIDTH, 320);
-                m_rightCam->set(CAP_PROP_FRAME_HEIGHT, 240);
-                cont = 0;
-                while (oriRightFrame.rows < 2 && cont<5) {
-                    m_rightCam->operator >>(oriRightFrame);
-                    cont++;
-                }
+            else
+            {
+                m_leftCam  = new cv::VideoCapture(m_leftCamDev->returnCamdevIndex());
+                m_rightCam = new cv::VideoCapture(m_rightCamDev->returnCamdevIndex());
             }
 
             while(1)
@@ -206,17 +255,30 @@ void ImageThread::run()
                 }
                 else
                 {
-                    m_leftCam->operator >>(oriLeftFrame);
-                    m_rightCam->operator >>(oriRightFrame);
-                    cv::Mat leftcorrectImage;
-                    undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
-                    cv::Mat rightcorrectImage;
-                    undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
-                    cv::Mat templeftframe;
-                    cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
-                    cv::Mat temprightframe;
-                    cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                    new_send_allImageDisp(templeftframe,temprightframe);
+                    if(isneedCamCali)
+                    {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        m_rightCam->operator >>(oriRightFrame);
+                        cv::Mat leftcorrectImage;
+                        undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
+                        cv::Mat rightcorrectImage;
+                        undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                        cv::Mat templeftframe;
+                        cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
+                        cv::Mat temprightframe;
+                        cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
+                        new_send_allImageDisp(templeftframe,temprightframe);
+                    }
+                    else
+                    {
+                        m_leftCam->operator >>(oriLeftFrame);
+                        m_rightCam->operator >>(oriRightFrame);
+                        cv::Mat templeftframe;
+                        cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
+                        cv::Mat temprightframe;
+                        cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
+                        new_send_allImageDisp(templeftframe,temprightframe);
+                    }
                 }
             }
             break;
@@ -302,7 +364,7 @@ void ImageThread::run()
                         {
                             cv::Mat temprightframe;
                             cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
-                             new_send_rightCaliImageDisp(temprightframe);
+                            new_send_rightCaliImageDisp(temprightframe);
                         }
                         else
                         {
@@ -320,7 +382,7 @@ void ImageThread::run()
                         {
                             cv::Mat temprightframe;
                             cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
-                             new_send_rightCaliImageDisp(temprightframe);
+                            new_send_rightCaliImageDisp(temprightframe);
                         }
                         else
                         {
@@ -328,7 +390,7 @@ void ImageThread::run()
                             undistort(oriRightFrame,correctImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
                             cv::Mat temprightframe;
                             cv::resize(correctImage,temprightframe,cv::Size(320,240));
-                             new_send_rightCaliImageDisp(temprightframe);
+                            new_send_rightCaliImageDisp(temprightframe);
                         }
                     }
                 }
@@ -404,7 +466,7 @@ void ImageThread::run()
                             cv::resize(oriLeftFrame,templeftframe,cv::Size(320,240));
                             cv::Mat temprightframe;
                             cv::resize(oriRightFrame,temprightframe,cv::Size(320,240));
-                             new_send_allCaliImageDisp(templeftframe,temprightframe);
+                            new_send_allCaliImageDisp(templeftframe,temprightframe);
                         }
                         else
                         {
@@ -416,7 +478,7 @@ void ImageThread::run()
                             undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
                             cv::Mat temprightframe;
                             cv::resize(rightcorrectImage,temprightframe,cv::Size(320,240));
-                             new_send_allCaliImageDisp(templeftframe,temprightframe);
+                            new_send_allCaliImageDisp(templeftframe,temprightframe);
                         }
                     }
                 }

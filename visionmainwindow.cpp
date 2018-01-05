@@ -1,6 +1,7 @@
 ﻿#include "visionmainwindow.h"
 #include "ui_visionmainwindow.h"
-
+#include <QMessageBox>
+#include <QDebug>
 VisionMainWindow::VisionMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VisionMainWindow)
@@ -13,6 +14,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     isprocFaceDetetion  = false;
     isfirstloadCameraThread = true;
     qRegisterMetaType<Mat>("Mat");
+    m_local = new Local_Algorithm;
     facedetect_action = new QAction(QString::fromLocal8Bit("人脸检测"),this);
     reset_action      = new QAction(QString::fromLocal8Bit("重置"),this);
     addAction(facedetect_action);
@@ -29,6 +31,7 @@ VisionMainWindow::VisionMainWindow(QWidget *parent) :
     connect(m_imgThread,SIGNAL(new_send_allImageDisp(Mat,Mat)),this,SLOT(new_accept_allImageDisp(Mat,Mat)),Qt::BlockingQueuedConnection);
     connect(this,SIGNAL(send_ControlCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_ControlCaminfo(bool,bool,bool)));
     connect(this,SIGNAL(send_CloseCamInfo(bool,bool,bool)),m_imgThread,SLOT(accept_CloseCaminfo(bool,bool,bool)));
+    connect(this,SIGNAL(send_isneeedCamCali(bool)),m_imgThread,SLOT(accept_isneedCamcali(bool)));
 }
 
 VisionMainWindow::~VisionMainWindow()
@@ -55,29 +58,63 @@ void VisionMainWindow::shutSlaveWindowSlot(int num)
 
 void VisionMainWindow::process_facedetectionaction(bool arg)
 {
-        arg = arg;
-        isprocFaceDetetion = !isprocFaceDetetion;
-
+    arg = arg;
+    isprocFaceDetetion = !isprocFaceDetetion;
 }
 
 void VisionMainWindow::new_accept_leftImageDisp(Mat leftMatImage)
 {
- leftImage = m_imgThread->convertMatToQImage(leftMatImage);
- ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+    if(isprocFaceDetetion)
+    {
+        Mat templeftFaceImage;
+        templeftFaceImage = m_local->faceDetectionFunc(leftMatImage);
+        leftImage = m_imgThread->convertMatToQImage(templeftFaceImage);
+        ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+    }
+    else
+    {
+        leftImage = m_imgThread->convertMatToQImage(leftMatImage);
+        ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+    }
+
 }
 
 void VisionMainWindow::new_accept_rightImageDisp(Mat rightMatImage)
 {
-   rightImage = m_imgThread->convertMatToQImage(rightMatImage);
-   ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    if(isprocFaceDetetion)
+    {
+        Mat temprightFaceImage;
+        temprightFaceImage = m_local->faceDetectionFunc(rightMatImage);
+        rightImage = m_imgThread->convertMatToQImage(temprightFaceImage);
+        ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    }
+    else
+    {
+        rightImage = m_imgThread->convertMatToQImage(rightMatImage);
+        ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    }
 }
 
 void VisionMainWindow::new_accept_allImageDisp(Mat leftMatImage, Mat rightMatImage)
 {
-    leftImage = m_imgThread->convertMatToQImage(leftMatImage);
-    ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
-    rightImage = m_imgThread->convertMatToQImage(rightMatImage);
-    ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    if(isprocFaceDetetion)
+    {
+        Mat templeftFaceImage;
+        templeftFaceImage = m_local->faceDetectionFunc(leftMatImage);
+        leftImage = m_imgThread->convertMatToQImage(templeftFaceImage);
+        Mat temprightFaceImage;
+        temprightFaceImage = m_local->faceDetectionFunc(rightMatImage);
+        rightImage = m_imgThread->convertMatToQImage(temprightFaceImage);
+        ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+        ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    }
+    else
+    {
+        leftImage = m_imgThread->convertMatToQImage(leftMatImage);
+        ui->left_disp->setPixmap(QPixmap::fromImage(leftImage));
+        rightImage = m_imgThread->convertMatToQImage(rightMatImage);
+        ui->right_disp->setPixmap(QPixmap::fromImage(rightImage));
+    }
 }
 
 void VisionMainWindow::on_actionCamDevSet_triggered()
@@ -101,20 +138,35 @@ void VisionMainWindow::on_openVisonbtn_clicked()
         if(isfirstloadCameraThread)
         {
             isfirstloadCameraThread = false;
+            QMessageBox::StandardButton rb = QMessageBox::question(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("您的相机是否已经标定，电脑摄像头，网络免驱摄像头或者手机摄像头一般已经标记过，请选择yes,其他选择no"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if(rb == QMessageBox::No)
+            {
+                send_isneeedCamCali(true);
+            }
+            else
+            {
+                 send_isneeedCamCali(false);
+            }
             m_imgThread->start();
-
         }
+        m_local->public_getfacedateBase();
         send_ControlCamInfo(false,false,false);
-        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉加载"));
+        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉关闭"));
+        QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("摄像头已经打开"));
     }
     else
     {
         send_ControlCamInfo(true,true,true);
-        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉关闭"));
+        QMessageBox::information(this,QString::fromLocal8Bit("通知"),QString::fromLocal8Bit("摄像头已经关闭"));
+        ui->openVisonbtn->setText(QString::fromLocal8Bit("视觉开启"));
     }
 }
 
 void VisionMainWindow::on_actionFaceCollection_triggered()
 {
     m_facecollect->show();
+}
+
+void VisionMainWindow::on_LoadDllBtn_clicked()
+{
 }
