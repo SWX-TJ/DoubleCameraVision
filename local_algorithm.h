@@ -22,14 +22,17 @@ public:
     string RightCaliCamFileLisrInfo;
     string resultLeftCamCal;
     string resultRightCamCal;
+    string resultDoubleCamCal;
     string LeftinnerMatrixXML;//result file xml
     string RightinnerMatrixXML;
+    string DoubleCameraMatrixXML;//DoubleCameraMatrix file xml
     Size board_size;//chess board rows_cornPointNum,cols_cornPointNum
     Size leftImage_size;//left Input Image rows,cols
     Size rightImage_size;//right Input Image rows,cols
     Size real_square_size;//physic chess square size
     int leftimage_count;//Input Image num
     int rightimage_count;//Input Image num
+    int DoubleImageCount;//Double Camera Calibration image num
     vector<Point2f> leftimage_points_buf;//cach per Image cornPoint Num
     vector<Point2f> rightimage_points_buf;//cach per Image cornPoint Num
     vector<vector<Point2f>> leftimage_points_seq;//save all cornPoint
@@ -37,6 +40,7 @@ public:
     /**calibrate Image used member**/
     FileStorage leftinnerMat;//left camera innermat xml
     FileStorage rightinnerMat;
+    FileStorage  doublecamMat;
     vector<Point2f> leftcaliimage_points_buf;//cach per Image cornPoint Num
     vector<Point2f> rightcaliimage_points_buf;//cach per Image cornPoint Num
     vector<vector<Point2f>> leftcaliimage_points_seq;//save all cornPoint
@@ -47,12 +51,19 @@ public:
     Mat rightcameraMatrix=Mat(3,3,CV_32FC1,Scalar::all(0)); /* 摄像机内参数矩阵 */
     vector<int> leftpoint_counts;  // 每幅图像中角点的数量
     vector<int> rightpoint_counts;  // 每幅图像中角点的数量
+    vector<vector<Point3f>> leftobject_points;//每幅图像中角点的物理坐标
+    vector<vector<Point3f>> rightobject_points;//每幅图像中角点的物理坐标
     Mat leftdistCoeffs=Mat(1,5,CV_32FC1,Scalar::all(0)); /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
     Mat rightdistCoeffs=Mat(1,5,CV_32FC1,Scalar::all(0)); /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
     vector<Mat> lefttvecsMat;  /* 每幅图像的旋转向量 */
     vector<Mat> leftrvecsMat; /* 每幅图像的平移向量 */
     vector<Mat> righttvecsMat;  /* 每幅图像的旋转向量 */
     vector<Mat> rightrvecsMat; /* 每幅图像的平移向量 */
+    /*********DoubleImage Calibration member*********/
+    Mat R, T, E, F;                                         //R 旋转矢量 T平移矢量 E本征矩阵 F基础矩阵
+    Mat Rl, Rr, Pl, Pr, Q;                                  //校正旋转矩阵R，投影矩阵P 重投影矩阵Q (下面有具体的含义解释）
+    Mat mapLx, mapLy, mapRx, mapRy;                         //映射表
+    Rect validROIL, validROIR;                              //图像校正之后，会对图像进行裁剪，这里的validROI就是指裁剪之后的区域
     /***calbration end******/
     /***base image process member***/
 
@@ -81,16 +92,20 @@ public:
     bool m_LeftCaliPrePoc_1(Mat &InputImage,int &image_count,int max_calibranum);
     //Right calibration image func v1.1
     bool m_RightCaliPrePoc_1(Mat &InputImage,int &image_count,int max_calibranum);
-    bool m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam);
+    //bool m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam);
+    //New CameraCalibrateFunc v1.1
+    bool m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam,bool DoubleCam);
     //set init board Size
     void set_chessBoardSize(int width,int height);
     //return use innerCammatrix
     vector<Mat> returnLeftCam(void);
     vector<Mat> returnRightCam(void);
- /**seeta face detection***/
+    //return use outnnerCamatrix
+    vector<Mat> returnDoubleCam(void);
+    /**seeta face detection***/
 public:
-     bool get_facedateBase(vector<vector<float>>&,vector<string>&);
-     bool public_getfacedateBase(void);
+    bool get_facedateBase(vector<vector<float>>&,vector<string>&);
+    bool public_getfacedateBase(void);
     Mat faceDetectionFunc(Mat &InputImage);
     bool FaceModule_FacePreTrain(Mat &InputImage,Mat &OutImage,float featureArray[]);
 };

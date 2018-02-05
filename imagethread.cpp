@@ -102,6 +102,7 @@ void ImageThread::run()
     {
         m_local_algro->returnLeftCam();
         m_local_algro->returnRightCam();
+        m_local_algro->returnDoubleCam();
         switch (CamSelect) {
         case LEFT_CAMERA:
             if(isneedCamCali)
@@ -260,9 +261,50 @@ void ImageThread::run()
                         m_leftCam->operator >>(oriLeftFrame);
                         m_rightCam->operator >>(oriRightFrame);
                         cv::Mat leftcorrectImage;
-                        undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
+                        remap(oriLeftFrame, leftcorrectImage, m_local_algro->mapLx, m_local_algro->mapLy, INTER_LINEAR);
+                        //undistort(oriLeftFrame,leftcorrectImage,m_local_algro->leftcameraMatrix,m_local_algro->leftdistCoeffs);
                         cv::Mat rightcorrectImage;
-                        undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                        remap(oriRightFrame, rightcorrectImage, m_local_algro->mapRx,m_local_algro-> mapRy, INTER_LINEAR);
+                        //undistort(oriRightFrame,rightcorrectImage,m_local_algro->rightcameraMatrix,m_local_algro->rightdistCoeffs);
+                        cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create(16, 9);
+                        bm->setPreFilterType(CV_STEREO_BM_NORMALIZED_RESPONSE);
+                        bm->setPreFilterCap(31);
+                        bm->setBlockSize(9);
+                        bm->setMinDisparity(0);
+                        int numberOfDisparities =((rightcorrectImage.size().width/8) + 15) & -16;
+                        bm->setNumDisparities(numberOfDisparities);
+                        bm->setTextureThreshold(10);
+                        bm->setUniquenessRatio(15);
+                        bm->setSpeckleWindowSize(100);
+                        bm->setSpeckleRange(32);
+                        bm->setDisp12MaxDiff(1);
+                        Ptr<StereoSGBM> sgbm = StereoSGBM::create(0,16,3);
+                        sgbm->setPreFilterCap(15);
+                        int sgbmWinSize = 11;
+                        sgbm->setBlockSize(sgbmWinSize);
+
+                        int cn = leftcorrectImage.channels();
+
+                        sgbm->setP1(8*cn*sgbmWinSize*sgbmWinSize);
+                        sgbm->setP2(64*cn*sgbmWinSize*sgbmWinSize);
+                        sgbm->setMinDisparity(0);
+                        sgbm->setNumDisparities(numberOfDisparities);
+                        sgbm->setUniquenessRatio(10);
+                        sgbm->setSpeckleWindowSize(100);
+                        sgbm->setSpeckleRange(32);
+                        sgbm->setDisp12MaxDiff(1);
+                        sgbm->setMode(StereoSGBM::MODE_SGBM);
+
+                        cv::Mat disImage;
+                        Mat grayleftcorrectImage,grayrightcorrectImage;
+                        cvtColor(leftcorrectImage,grayleftcorrectImage,COLOR_BGR2GRAY);
+                        cvtColor(rightcorrectImage,grayrightcorrectImage,COLOR_BGR2GRAY);
+                        //bm->compute(grayleftcorrectImage,grayrightcorrectImage,disImage);
+                       copyMakeBorder(grayleftcorrectImage, grayleftcorrectImage, 0, 0, numberOfDisparities, 0, IPL_BORDER_REPLICATE);  //防止黑边
+                        copyMakeBorder(grayrightcorrectImage, grayrightcorrectImage, 0, 0,numberOfDisparities, 0, IPL_BORDER_REPLICATE);
+                        sgbm->compute(grayleftcorrectImage,grayrightcorrectImage,disImage);
+                        disImage = disImage.colRange(numberOfDisparities,grayleftcorrectImage.cols);
+                        disImage.convertTo(disImage, CV_8U, 255/(numberOfDisparities*16.));
                         cv::Mat templeftframe;
                         cv::resize(leftcorrectImage,templeftframe,cv::Size(320,240));
                         cv::Mat temprightframe;
@@ -316,7 +358,7 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            if(m_local_algro->m_CalibrateCamera(true,false))
+                            if(m_local_algro->m_CalibrateCamera(true,false,false))
                             {
                                 send_isdownCalibration(true);
                             }
@@ -369,7 +411,7 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            if(m_local_algro->m_CalibrateCamera(false,true))
+                            if(m_local_algro->m_CalibrateCamera(false,true,false))
                             {
                                 send_isdownCalibration(true);
                             }
@@ -451,7 +493,7 @@ void ImageThread::run()
                         else
                         {
                             isCaliCam = false;
-                            if(m_local_algro->m_CalibrateCamera(true,true))
+                            if(m_local_algro->m_CalibrateCamera(true,true,true))
                             {
                                 send_isdownCalibration(true);
                             }

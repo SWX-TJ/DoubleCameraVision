@@ -3,13 +3,16 @@ Local_Algorithm::Local_Algorithm()
 {
     leftimage_count = 0;//Left Input Image num
     rightimage_count = 0;//Right Input Image num
+    DoubleImageCount = 0;
     LeftCaliCamFileLisrInfo = "LeftCaliImageInfo.txt";
     RightCaliCamFileLisrInfo = "RightCaliImageInfo.txt";
     facedateBaseFile = "facedabase.csv";
     LeftinnerMatrixXML = "leftcaminnerMat.xml";
     RightinnerMatrixXML = "rightcaminnerMat.xml";
+    DoubleCameraMatrixXML ="doublecamMat.xml";
     resultLeftCamCal = "left_caliberation_result.txt";
     resultRightCamCal = "right_caliberation_result.txt";
+    resultDoubleCamCal = "double_caliberation_result.txt";
     //
 }
 
@@ -132,9 +135,199 @@ bool Local_Algorithm::m_RightCaliPrePoc_1(Mat &InputImage, int &image_count, int
 
 
 
-bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
-{
+//bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
+//{
 
+//    if(OnlyLeftCam)
+//    {
+//        ifstream openLeftCaliImgList;
+//        openLeftCaliImgList.open(LeftCaliCamFileLisrInfo);
+//        leftinnerMat.open(LeftinnerMatrixXML,FileStorage::WRITE);
+//        ofstream fout(resultLeftCamCal);
+//        fout<<"left Camera Clibration result"<<endl;
+//        //fout<<"左相机标定结果"<<endl;
+//        string leftfilename;
+//        while (getline(openLeftCaliImgList,leftfilename))
+//        {
+//            leftimage_count++;
+//            Mat imageInput=imread(leftfilename);
+//            if (leftimage_count == 1)
+//            {
+//                leftImage_size.width = imageInput.cols;
+//                leftImage_size.height =imageInput.rows;
+//            }
+//            if (0 == findChessboardCorners(imageInput,board_size,leftcaliimage_points_buf))
+//            {
+//                return false;
+//            }
+//            else
+//            {
+//                Mat grayImage;
+//                cvtColor(imageInput,grayImage,CV_RGB2GRAY);
+//                find4QuadCornerSubpix(grayImage,leftcaliimage_points_buf,Size(5,5));
+//                leftcaliimage_points_seq.push_back(leftcaliimage_points_buf);
+//            }
+//        }
+//        vector<vector<Point3f>> object_points;
+//        int i,j,t;
+//        for (t=0;t<leftimage_count;t++)
+//        {
+//            vector<Point3f> tempPointSet;
+//            for (i=0;i<board_size.height;i++)
+//            {
+//                for (j=0;j<board_size.width;j++)
+//                {
+//                    Point3f realPoint;
+//                    realPoint.x = i* real_square_size.width;
+//                    realPoint.y = j* real_square_size.height;
+//                    realPoint.z = 0;
+//                    tempPointSet.push_back(realPoint);
+//                }
+//            }
+//            object_points.push_back(tempPointSet);
+//        }
+//        for (i=0;i<leftimage_count;i++)
+//        {
+//            leftpoint_counts.push_back(board_size.width*board_size.height);
+//        }
+//        calibrateCamera(object_points,leftcaliimage_points_seq,leftImage_size,leftcameraMatrix,leftdistCoeffs,leftrvecsMat,lefttvecsMat,0);
+//        double total_err = 0.0;
+//        double err = 0.0;
+//        vector<Point2f> image_points2;
+//        for (int i=0;i<leftimage_count;i++)
+//        {
+//            vector<Point3f> tempPointSet=object_points[i];
+//            projectPoints(tempPointSet,leftrvecsMat[i],lefttvecsMat[i],leftcameraMatrix,leftdistCoeffs,image_points2);
+//            vector<Point2f> tempImagePoint = leftcaliimage_points_seq[i];
+//            Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
+//            Mat image_points2Mat = Mat(1,image_points2.size(), CV_32FC2);
+//            for (size_t j = 0 ; j < tempImagePoint.size(); j++)
+//            {
+//                image_points2Mat.at<Vec2f>(0,j) = Vec2f(image_points2[j].x, image_points2[j].y);
+//                tempImagePointMat.at<Vec2f>(0,j) = Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
+//            }
+//            err = norm(image_points2Mat, tempImagePointMat, NORM_L2);
+//            total_err += err/=  leftpoint_counts[i];
+//            fout<<string("The")<<i+1<<string("images average pix err: ")<<err<<string("pix")<<std::endl;
+//        }
+//        fout<<string("Total mean err:")<<total_err/leftimage_count<<string("pix")<<endl<<endl;
+//        Mat rotation_matrix = Mat(3,3,CV_32FC1, Scalar::all(0));
+//        fout<<string("相机内参数矩阵：")<<endl;
+//        leftinnerMat<<"LeftInnerCamMatrix"<<leftcameraMatrix;
+//        fout<<leftcameraMatrix<<endl<<endl;
+//        fout<<string("畸变系数：\n");
+//        leftinnerMat<<"LeftdistCoeffs"<<leftdistCoeffs;
+//        fout<<leftdistCoeffs<<endl<<endl<<endl;
+//        for (int i=0; i<leftimage_count; i++)
+//        {
+//            fout<<string("第")<<i+1<<"幅图像的旋转向量："<<endl;
+//            fout<<lefttvecsMat[i]<<endl;
+//            Rodrigues(lefttvecsMat[i],rotation_matrix);
+//            fout<<"第"<<i+1<<"幅图像的旋转矩阵："<<endl;
+//            fout<<rotation_matrix<<endl;
+//            fout<<"第"<<i+1<<"幅图像的平移向量："<<endl;
+//            fout<<leftrvecsMat[i]<<endl<<endl;
+//        }
+//        fout<<endl;
+//        leftinnerMat.release();
+//    }
+//    if(OnlyRightCam)
+//    {
+//        ifstream openRightCaliImgList;
+//        openRightCaliImgList.open(RightCaliCamFileLisrInfo);
+//        rightinnerMat.open( RightinnerMatrixXML,FileStorage::WRITE);
+//        ofstream fout(resultRightCamCal);
+//        fout<<"右相机标定结果"<<endl;
+//        string rightfilename;
+//        while (getline(openRightCaliImgList,rightfilename))
+//        {
+//            rightimage_count++;
+//            Mat imageInput=imread(rightfilename);
+//            if (rightimage_count == 1)
+//            {
+//                rightImage_size.width = imageInput.cols;
+//                rightImage_size.height =imageInput.rows;
+//            }
+//            if (0 == findChessboardCorners(imageInput,board_size,rightcaliimage_points_buf))
+//            {
+//                return false;
+//            }
+//            else
+//            {
+//                Mat grayImage;
+//                cvtColor(imageInput,grayImage,CV_RGB2GRAY);
+//                find4QuadCornerSubpix(grayImage,rightcaliimage_points_buf,Size(5,5)); //对粗提取的角点进行精确化
+//                rightcaliimage_points_seq.push_back(rightcaliimage_points_buf);  //保存亚像素角点
+//            }
+//        }
+//        vector<vector<Point3f>> object_points;
+//        int i,j,t;
+//        for (t=0;t<rightimage_count;t++)
+//        {
+//            vector<Point3f> tempPointSet;
+//            for (i=0;i<board_size.height;i++)
+//            {
+//                for (j=0;j<board_size.width;j++)
+//                {
+//                    Point3f realPoint;
+//                    realPoint.x = i* real_square_size.width;
+//                    realPoint.y = j* real_square_size.height;
+//                    realPoint.z = 0;
+//                    tempPointSet.push_back(realPoint);
+//                }
+//            }
+//            object_points.push_back(tempPointSet);
+//        }
+//        for (i=0;i<rightimage_count;i++)
+//        {
+//            rightpoint_counts.push_back(board_size.width*board_size.height);
+//        }
+//        calibrateCamera(object_points,rightcaliimage_points_seq,rightImage_size,rightcameraMatrix,rightdistCoeffs,rightrvecsMat,righttvecsMat,0);
+//        double total_err = 0.0;
+//        double err = 0.0;
+//        vector<Point2f> image_points2;
+//        for (int i=0;i<rightimage_count;i++)
+//        {
+//            vector<Point3f> tempPointSet=object_points[i];
+//            projectPoints(tempPointSet,rightrvecsMat[i],righttvecsMat[i],rightcameraMatrix,rightdistCoeffs,image_points2);
+//            vector<Point2f> tempImagePoint = rightcaliimage_points_seq[i];
+//            Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
+//            Mat image_points2Mat = Mat(1,image_points2.size(), CV_32FC2);
+//            for (size_t j = 0 ; j < tempImagePoint.size(); j++)
+//            {
+//                image_points2Mat.at<Vec2f>(0,j) = Vec2f(image_points2[j].x, image_points2[j].y);
+//                tempImagePointMat.at<Vec2f>(0,j) = Vec2f(tempImagePoint[j].x, tempImagePoint[j].y);
+//            }
+//            err = norm(image_points2Mat, tempImagePointMat, NORM_L2);
+//            total_err += err/=  rightpoint_counts[i];
+//            fout<<"第"<<i+1<<"幅图像平均误差："<<err<<"像素"<<endl;
+//        }
+//        fout<<string("总体平均误差：")<<total_err/rightimage_count<<"pix"<<endl<<endl;
+//        Mat rotation_matrix = Mat(3,3,CV_32FC1, Scalar::all(0));
+//        fout<<"相机内参数矩阵："<<endl;
+//        rightinnerMat<<"RightInnerCamMatrix"<<rightcameraMatrix;
+//        fout<<rightcameraMatrix<<endl<<endl;
+//        fout<<"畸变系数：\n";
+//        rightinnerMat<<"RightdistCoeffs"<<rightdistCoeffs;
+//        fout<<rightdistCoeffs<<endl<<endl<<endl;
+//        for (int i=0; i<rightimage_count; i++)
+//        {
+//            fout<<"第"<<i+1<<"幅图像的旋转向量："<<endl;
+//            fout<<righttvecsMat[i]<<endl;
+//            Rodrigues(righttvecsMat[i],rotation_matrix);
+//            fout<<"第"<<i+1<<"幅图像的旋转矩阵："<<endl;
+//            fout<<rotation_matrix<<endl;
+//            fout<<"第"<<i+1<<"幅图像的平移向量："<<endl;
+//            fout<<rightrvecsMat[i]<<endl<<endl;
+//        }
+//        fout<<endl;
+//        rightinnerMat.release();
+//    }
+//    return true;
+//}
+
+bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam, bool OnlyRightCam, bool DoubleCam)
+{
     if(OnlyLeftCam)
     {
         ifstream openLeftCaliImgList;
@@ -142,7 +335,6 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
         leftinnerMat.open(LeftinnerMatrixXML,FileStorage::WRITE);
         ofstream fout(resultLeftCamCal);
         fout<<"left Camera Clibration result"<<endl;
-        //fout<<"左相机标定结果"<<endl;
         string leftfilename;
         while (getline(openLeftCaliImgList,leftfilename))
         {
@@ -165,7 +357,7 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
                 leftcaliimage_points_seq.push_back(leftcaliimage_points_buf);
             }
         }
-        vector<vector<Point3f>> object_points;
+
         int i,j,t;
         for (t=0;t<leftimage_count;t++)
         {
@@ -181,19 +373,19 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
                     tempPointSet.push_back(realPoint);
                 }
             }
-            object_points.push_back(tempPointSet);
+            leftobject_points.push_back(tempPointSet);
         }
         for (i=0;i<leftimage_count;i++)
         {
             leftpoint_counts.push_back(board_size.width*board_size.height);
         }
-        calibrateCamera(object_points,leftcaliimage_points_seq,leftImage_size,leftcameraMatrix,leftdistCoeffs,leftrvecsMat,lefttvecsMat,0);
+        calibrateCamera(leftobject_points,leftcaliimage_points_seq,leftImage_size,leftcameraMatrix,leftdistCoeffs,leftrvecsMat,lefttvecsMat,0);
         double total_err = 0.0;
         double err = 0.0;
         vector<Point2f> image_points2;
         for (int i=0;i<leftimage_count;i++)
         {
-            vector<Point3f> tempPointSet=object_points[i];
+            vector<Point3f> tempPointSet=leftobject_points[i];
             projectPoints(tempPointSet,leftrvecsMat[i],lefttvecsMat[i],leftcameraMatrix,leftdistCoeffs,image_points2);
             vector<Point2f> tempImagePoint = leftcaliimage_points_seq[i];
             Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
@@ -257,7 +449,7 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
                 rightcaliimage_points_seq.push_back(rightcaliimage_points_buf);  //保存亚像素角点
             }
         }
-        vector<vector<Point3f>> object_points;
+
         int i,j,t;
         for (t=0;t<rightimage_count;t++)
         {
@@ -273,19 +465,20 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
                     tempPointSet.push_back(realPoint);
                 }
             }
-            object_points.push_back(tempPointSet);
+            rightobject_points.push_back(tempPointSet);
         }
         for (i=0;i<rightimage_count;i++)
         {
             rightpoint_counts.push_back(board_size.width*board_size.height);
         }
-        calibrateCamera(object_points,rightcaliimage_points_seq,rightImage_size,rightcameraMatrix,rightdistCoeffs,rightrvecsMat,righttvecsMat,0);
+
+        calibrateCamera( rightobject_points,rightcaliimage_points_seq,rightImage_size,rightcameraMatrix,rightdistCoeffs,rightrvecsMat,righttvecsMat,0);
         double total_err = 0.0;
         double err = 0.0;
         vector<Point2f> image_points2;
         for (int i=0;i<rightimage_count;i++)
         {
-            vector<Point3f> tempPointSet=object_points[i];
+            vector<Point3f> tempPointSet= rightobject_points[i];
             projectPoints(tempPointSet,rightrvecsMat[i],righttvecsMat[i],rightcameraMatrix,rightdistCoeffs,image_points2);
             vector<Point2f> tempImagePoint = rightcaliimage_points_seq[i];
             Mat tempImagePointMat = Mat(1,tempImagePoint.size(),CV_32FC2);
@@ -320,7 +513,64 @@ bool Local_Algorithm::m_CalibrateCamera(bool OnlyLeftCam,bool OnlyRightCam)
         fout<<endl;
         rightinnerMat.release();
     }
-    return true;
+    if(DoubleCam)
+    {
+        //计算矩阵
+        doublecamMat.open(DoubleCameraMatrixXML,FileStorage::WRITE);
+        ofstream fout(resultDoubleCamCal);
+        fout<<"双目立体校准标定结果"<<endl;
+        std::cout<<"objPt_size:"<<leftobject_points.size()<<endl;
+        std::cout<<"leftcaliimage_points_seq:"<<leftcaliimage_points_seq.size()<<endl;
+        std::cout<<"rightcaliimage_points_seq:"<<rightcaliimage_points_seq.size()<<endl;
+        if(rightcaliimage_points_seq.size()==leftcaliimage_points_seq.size())
+        {
+
+            double rms = stereoCalibrate(leftobject_points, leftcaliimage_points_seq, rightcaliimage_points_seq,
+                                         leftcameraMatrix, leftdistCoeffs,
+                                         rightcameraMatrix, rightdistCoeffs,
+                                         leftImage_size, R, T, E, F,
+                                         CALIB_FIX_ASPECT_RATIO +
+                                                             CALIB_ZERO_TANGENT_DIST +
+                                                             CALIB_USE_INTRINSIC_GUESS +
+                                                             CALIB_SAME_FOCAL_LENGTH +
+                                                             CALIB_RATIONAL_MODEL +
+                                                             CALIB_FIX_K3 + CALIB_FIX_K4 + CALIB_FIX_K5,
+                                                             TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 100, 1e-5) );
+            std::cout << "Stereo Calibration done with RMS error = " << rms << endl;
+            //立体矫正
+            stereoRectify(leftcameraMatrix, leftdistCoeffs, rightcameraMatrix, rightdistCoeffs, leftImage_size, R, T, Rl, Rr, Pl, Pr, Q,
+                          CALIB_ZERO_DISPARITY,0,Size(leftImage_size.width*1,leftImage_size.height*1),&validROIL,&validROIR);
+            //计算矫正隐射
+            initUndistortRectifyMap(leftcameraMatrix, leftdistCoeffs, Rl, Pl, Size(leftImage_size.width*1,leftImage_size.height*1), CV_32F, mapLx, mapLy);
+            initUndistortRectifyMap(rightcameraMatrix, rightdistCoeffs, Rr, Pr, Size(leftImage_size.width*1,leftImage_size.height*1), CV_32F, mapRx, mapRy);
+            fout<<"双目旋转矩阵R："<<R<<endl;
+            fout<<"双目平移矩阵T："<<T<<endl;
+            fout<<"4D重映射矩阵Q："<<Q<<endl;
+            fout<<"左摄像机矫正Rl："<<Rl<<endl;
+            fout<<"左摄像机矫正Pl："<<Pl<<endl;
+            fout<<"右摄像机矫正Rr："<<Rr<<endl;
+            fout<<"右摄像机矫正Pr："<<Pr<<endl;
+            fout<<"左摄像机重映射mapx："<<mapLx<<endl;
+            fout<<"左摄像机重映射mapy："<<mapLy<<endl;
+            fout<<"右摄像机重映射mapx："<<mapRx<<endl;
+            fout<<"右摄像机重映射mapy："<<mapRy<<endl;
+            doublecamMat<<"R"<<R;
+            doublecamMat<<"T"<<T;
+            doublecamMat<<"Q"<<Q;
+            doublecamMat<<"LeftCameraMapx"<<mapLx;
+            doublecamMat<<"LeftCameraMapy"<<mapLy;
+            doublecamMat<<"RightCameraMapx"<<mapRx;
+            doublecamMat<<"RightCameraMapy"<<mapRy;
+            doublecamMat.release();
+            fout.close();
+             return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 }
 
 
@@ -353,6 +603,28 @@ vector<Mat> Local_Algorithm::returnRightCam()
     rightcammatrixs.push_back(rightdistCoeffs);
     rightinnerMat.release();
     return rightcammatrixs;
+}
+
+vector<Mat> Local_Algorithm::returnDoubleCam()
+{
+    vector<Mat>doublecammatrixs;
+    doublecamMat.open( DoubleCameraMatrixXML,FileStorage::READ);
+    doublecamMat["R"] >> R;
+    doublecamMat["T"] >> T;
+    doublecamMat["Q"] >> Q;
+    doublecamMat["LeftCameraMapx"] >> mapLx;
+    doublecamMat["LeftCameraMapy"] >> mapLy;
+    doublecamMat["RightCameraMapx"] >> mapRx;
+    doublecamMat["RightCameraMapy"] >> mapRy;
+    doublecammatrixs.push_back(R);
+    doublecammatrixs.push_back(T);
+    doublecammatrixs.push_back(Q);
+    doublecammatrixs.push_back(mapLx);
+    doublecammatrixs.push_back(mapLy);
+    doublecammatrixs.push_back(mapRx);
+    doublecammatrixs.push_back(mapRy);
+    doublecamMat.release();
+    return doublecammatrixs;
 }
 
 bool Local_Algorithm::get_facedateBase(vector<vector<float>> &face_feature_datebase, vector<string> &face_name_datebase)
@@ -475,13 +747,13 @@ Mat Local_Algorithm::faceDetectionFunc(Mat &InputImage)
         }
         if(final_j_name!=-1)
         {
-        putText(proInputImage,extral_face_name_datebase.at(final_j_name),Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
-        final_j_name = -1;
-        max_sim= 0;
+            putText(proInputImage,extral_face_name_datebase.at(final_j_name),Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
+            final_j_name = -1;
+            max_sim= 0;
         }
         else
         {
-             putText(proInputImage,"unknown people",Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
+            putText(proInputImage,"unknown people",Point(faces[i].bbox.x,faces[i].bbox.y-10),FONT_HERSHEY_SIMPLEX,1,Scalar(0,255,0),4,8);
             final_j_name = -1;
             max_sim= 0;
         }
